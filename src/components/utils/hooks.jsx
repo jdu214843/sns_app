@@ -1,8 +1,11 @@
-import { unstable_HistoryRouter } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
-const handleLastPage = () => {
-  const history = unstable_HistoryRouter();
-  history.goBack();
-};
+// const useHandleLastPage = () => {
+//   const navigate = useNavigate();
+//   const handleLastPage = () => {
+//     navigate(-1);
+//   };
+//   return handleLastPage;
+// };
 
-export { handleLastPage };
+// export { useHandleLastPage };

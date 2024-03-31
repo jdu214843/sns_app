@@ -1,7 +1,7 @@
 import React from "react";
 
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
-import SignIn from "../SignIn/signin";
+
 import {
   ProfileClocks,
   ProfileIcon,
@@ -44,9 +44,9 @@ const Profile = () => {
       <ProfileLoginImg>
         <ProfileImgIcon>Img</ProfileImgIcon>
         <ProfileLogin>
-          <SignIn>
+          {/* <SignIn>
             <h1>Sign In</h1>
-          </SignIn>
+          </SignIn> */}
         </ProfileLogin>
       </ProfileLoginImg>
     </ProfileBox>

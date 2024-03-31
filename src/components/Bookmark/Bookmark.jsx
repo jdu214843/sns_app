@@ -1,7 +1,7 @@
 import React from "react";
 
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
-import { handleLastPage } from "../utils/hooks";
+
 import {
   BookmarkClocks,
   BookmarkIcon,
@@ -33,7 +33,7 @@ const Bookmark = () => {
         </BookmarkIcon>
       </BookmarkParentTitle>
       <BookmarkTitle>
-        <BookmarkArrow onClick={handleLastPage} />
+        <BookmarkArrow />
         <BookmarkH3>Bookmarks</BookmarkH3>
       </BookmarkTitle>
     </div>

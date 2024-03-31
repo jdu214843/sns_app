@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
 
 import {
@@ -18,10 +18,9 @@ import {
   StyledBottomNavigationAction,
   StyledIcon,
 } from "./components/Style/StyledBottomNavigationAction";
-import SignUp from "./components/SignUp/signup";
 
 const App = () => {
-  const [value, setValue] = React.useState("home");
+  const [value, setValue] = useState("/home");
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -35,7 +34,6 @@ const App = () => {
           <Route path="/messages" element={<Massages />} />
           <Route path="/bookmark" element={<Bookmark />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/signup" element={<SignUp />} />
         </Routes>
 
         <BottomNavigationParent value={value} onChange={handleChange}>

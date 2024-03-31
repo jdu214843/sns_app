@@ -115,7 +115,7 @@ const Home = () => {
           onChange={handleInputChange}
           placeholder="What is the post text?"
         />
-        <MaxLengthText reached={Number(postText.length >= maxLength)}>
+        <MaxLengthText $reached={Number(postText.length >= maxLength)}>
           {postText.length}/{maxLength}
         </MaxLengthText>
         <Button
