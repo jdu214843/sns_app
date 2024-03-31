@@ -18,6 +18,8 @@ import {
   StyledBottomNavigationAction,
   StyledIcon,
 } from "./components/Style/StyledBottomNavigationAction";
+import SignIn from "./components/SignIn/signin";
+import SignUp from "./components/SignUp/signup";
 
 const App = () => {
   const [value, setValue] = useState("/home");
@@ -30,7 +32,9 @@ const App = () => {
     <Router>
       <Container>
         <Routes>
-          <Route exact path="/" element={<Home />} />
+          <Route exact path="/" element={<SignIn />} />
+          <Route exact path="/signup" element={<SignUp />} />
+          <Route exact path="/home" element={<Home />} />
           <Route path="/messages" element={<Massages />} />
           <Route path="/bookmark" element={<Bookmark />} />
           <Route path="/profile" element={<Profile />} />
