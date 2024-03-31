@@ -12,7 +12,7 @@ function Validation(values) {
   }
 
   if (values.password === "") {
-    error.password = "Please enter a valid email address";
+    error.password = "Please enter a valid password";
   } else if (!password_pattern.test(values.password)) {
     error.password = "password did not match";
   } else {

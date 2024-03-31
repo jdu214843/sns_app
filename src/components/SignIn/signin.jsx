@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate hook
 import Validation from "./SignInValidation.js";
+import axios from "axios";
 
 const SignIn = () => {
+  const navigate = useNavigate(); // Initialize useNavigate hook
+
   const [errors, setErrors] = useState({});
 
   const [values, setValues] = useState({
@@ -13,12 +16,28 @@ const SignIn = () => {
   const handleInput = (event) => {
     setValues((prev) => ({
       ...prev,
-      [event.target.name]: [event.target.value],
+      [event.target.name]: event.target.value,
     }));
   };
-  const handleSubmit = (event) => {
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
     setErrors(Validation(values));
+    if (errors.email === "" && errors.password === "") {
+      try {
+        const res = await axios
+          .post("http://localhost:8081/signin", values)
+          .then((res) => {
+            if (res.data === "Success") {
+              navigate("/home");
+            } else {
+              alert("No record existed");
+            }
+          });
+      } catch (err) {
+        console.log(err);
+      }
+    }
   };
 
   return (

@@ -4,7 +4,7 @@ function Validation(values) {
   const password_pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]{8,}$/;
 
   if (values.username === "") {
-    error.username = "Please enter a valid email address";
+    error.username = "Please enter a valid username";
   } else {
     error.username = "";
   }
@@ -17,7 +17,7 @@ function Validation(values) {
   }
 
   if (values.password === "") {
-    error.password = "Please enter a valid email address";
+    error.password = "Please enter password";
   } else if (!password_pattern.test(values.password)) {
     error.password = "password did not match";
   } else {
