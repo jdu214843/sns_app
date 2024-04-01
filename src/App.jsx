@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Link,
+  useLocation,
+} from "react-router-dom";
 
 import {
   Home,
@@ -21,13 +27,63 @@ import {
 import SignIn from "./components/SignIn/signin";
 import SignUp from "./components/SignUp/signup";
 
-const App = () => {
+const NavigationBar = () => {
+  const location = useLocation();
   const [value, setValue] = useState("/home");
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
+  return (
+    location.pathname !== "/" &&
+    location.pathname !== "/signup" && (
+      <BottomNavigationParent value={value} onChange={handleChange}>
+        <StyledBottomNavigationAction
+          icon={
+            <StyledIcon>
+              <HomeIcon />
+            </StyledIcon>
+          }
+          component={Link}
+          to="/home"
+        />
+
+        <StyledBottomNavigationAction
+          icon={
+            <StyledIcon>
+              <MessageIcon />
+            </StyledIcon>
+          }
+          component={Link}
+          to="/messages"
+        />
+
+        <StyledBottomNavigationAction
+          icon={
+            <StyledIcon>
+              <BookmarkIcon />
+            </StyledIcon>
+          }
+          component={Link}
+          to="/bookmark"
+        />
+
+        <StyledBottomNavigationAction
+          icon={
+            <StyledIcon>
+              <PersonIcon />
+            </StyledIcon>
+          }
+          component={Link}
+          to="/profile"
+        />
+      </BottomNavigationParent>
+    )
+  );
+};
+
+const App = () => {
   return (
     <Router>
       <Container>
@@ -40,45 +96,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
         </Routes>
 
-        <BottomNavigationParent value={value} onChange={handleChange}>
-          <StyledBottomNavigationAction
-            icon={
-              <StyledIcon>
-                <HomeIcon />
-              </StyledIcon>
-            }
-            component={Link}
-            to="/home"
-          />
-
-          <StyledBottomNavigationAction
-            icon={
-              <StyledIcon>
-                <MessageIcon />
-              </StyledIcon>
-            }
-            component={Link}
-            to="/messages"
-          />
-          <StyledBottomNavigationAction
-            icon={
-              <StyledIcon>
-                <BookmarkIcon />
-              </StyledIcon>
-            }
-            component={Link}
-            to="/bookmark"
-          />
-          <StyledBottomNavigationAction
-            icon={
-              <StyledIcon>
-                <PersonIcon />
-              </StyledIcon>
-            }
-            component={Link}
-            to="/profile"
-          />
-        </BottomNavigationParent>
+        <NavigationBar />
       </Container>
     </Router>
   );
