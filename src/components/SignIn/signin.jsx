@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import useNavigate hook
+import { Link, useNavigate } from "react-router-dom";
 import Validation from "./SignInValidation.js";
 import axios from "axios";
-
+import "./style.css";
 const SignIn = () => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate(); 
 
   const [errors, setErrors] = useState({});
 
@@ -41,10 +41,19 @@ const SignIn = () => {
   };
 
   return (
-    <div>
+    <div className="section_box">
       <div>
+        <div className="LogBoxtitle">
+          <p className="logTitle">Log in to Chatbox</p>
+          <p className="welcome">
+            {" "}
+            Welcome back! Sign in using your social <br /> account or email to
+            continue us
+          </p>
+        </div>
+
         <form action="" onSubmit={handleSubmit}>
-          <div>
+          <div className="inputBox">
             <label htmlFor="email">Email</label>
             <input
               type="email"
@@ -54,7 +63,7 @@ const SignIn = () => {
             />
             <span>{errors.email && <span>{errors.email}</span>}</span>
           </div>
-          <div>
+          <div className="inputBox2">
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -64,9 +73,13 @@ const SignIn = () => {
             />
             <span>{errors.password && <span>{errors.password}</span>}</span>
           </div>
-          <button type="submit">Sign In</button>
-          <p>or</p>
-          <Link to={"/signup"}>Create Account</Link>
+          <button className="sign_btn" type="submit">
+            Sign In
+          </button>
+          <p className="or">or</p>
+          <Link to={"/signup"} className="create_account">
+            Create Account
+          </Link>
         </form>
       </div>
     </div>

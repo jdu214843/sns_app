@@ -48,7 +48,7 @@ const App = () => {
               </StyledIcon>
             }
             component={Link}
-            to="/"
+            to="/home"
           />
 
           <StyledBottomNavigationAction

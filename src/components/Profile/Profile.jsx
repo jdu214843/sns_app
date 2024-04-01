@@ -17,6 +17,7 @@ import {
   ProfileBox,
   ProfileImgIcon,
 } from "./style";
+import LogOut from "./logout";
 
 const Profile = () => {
   return (
@@ -44,9 +45,9 @@ const Profile = () => {
       <ProfileLoginImg>
         <ProfileImgIcon>Img</ProfileImgIcon>
         <ProfileLogin>
-          {/* <SignIn>
+          <LogOut>
             <h1>Sign In</h1>
-          </SignIn> */}
+          </LogOut>
         </ProfileLogin>
       </ProfileLoginImg>
     </ProfileBox>

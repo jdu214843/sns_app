@@ -74,7 +74,15 @@ const ProfileLogin = styled.div`
   border-top-left-radius: 50px;
   border-top-right-radius: 50px;
 `;
+const Button = styled.button`
+  outline: none;
+  border: none;
+  align-items: center;
+  margin-left: 20px;
+`;
+
 export {
+  Button,
   ProfileBox,
   ProfileClocks,
   ProfileIcon,
