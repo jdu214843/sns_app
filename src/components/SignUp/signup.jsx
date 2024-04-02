@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "./SignUpValidation";
 import axios from "axios";
+import "./signup.css";
 const SignUp = () => {
   const [errors, setErrors] = useState({});
 
@@ -35,10 +36,18 @@ const SignUp = () => {
   };
 
   return (
-    <div>
+    <div className="SignUpSection">
       <div>
+        <div className="SignUpTitle">
+          <p className="titleSignUp">Log in to Chatbox</p>
+          <p className="welcome">
+            {" "}
+            Get chatting with friends and family <br /> today by signing up for
+            our chat app!
+          </p>
+        </div>
         <form action="" onSubmit={handleSubmit}>
-          <div>
+          <div className="inputBox">
             <label htmlFor="username">Username</label>
             <input
               type="text"
@@ -48,7 +57,7 @@ const SignUp = () => {
             />
             <span>{errors.username && <span>{errors.username}</span>}</span>
           </div>
-          <div>
+          <div className="inputBox2">
             <label htmlFor="email">Email</label>
             <input
               type="email"
@@ -58,7 +67,7 @@ const SignUp = () => {
             />
             <span>{errors.email && <span>{errors.email}</span>}</span>
           </div>
-          <div>
+          <div className="inputBox3">
             <label htmlFor="password">Password</label>
             <input
               type="password"
@@ -68,9 +77,13 @@ const SignUp = () => {
             />
             <span>{errors.password && <span>{errors.password}</span>}</span>
           </div>
-          <button type="submit">Sign Up</button>
-          <p>or</p>
-          <Link to={"/"}>Sign In</Link>
+          <button className="sign_btn" type="submit">
+            Sign Up
+          </button>
+          <p className="or">or</p>
+          <Link to={"/"} className="sign_in">
+            Sign In
+          </Link>
         </form>
       </div>
     </div>

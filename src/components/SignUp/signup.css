@@ -1,0 +1,81 @@
+.SignUpSection {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+}
+
+.titleSignUp {
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+.welcome {
+  font-size: 14px;
+  color: #797c7b;
+}
+.SignUpTitle {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  padding-top: 120px;
+}
+form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-self: center;
+  margin-top: 100px;
+}
+.or {
+  text-align: center;
+  color: #c0bdbd;
+}
+.sign_in {
+  text-align: center;
+  color: #24786d;
+  font-family: bold;
+  font-size: 16px;
+  font-weight: 700;
+}
+label {
+  font-family: sans-serif;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #24786d;
+}
+.inputBox {
+  display: flex;
+  flex-direction: column;
+}
+.inputBox2 {
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+}
+.inputBox3 {
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+}
+input {
+  width: 200px !important;
+  padding: 5px 15px;
+  border: none;
+  outline: none;
+  border-bottom: 1px solid #c0bdbd;
+}
+span {
+  display: flex;
+  position: fixed;
+  margin-top: 30px;
+  color: red;
+}
+.sign_btn {
+  margin-top: 100px;
+  padding: 10px;
+  border: none;
+  outline: none;
+  border-radius: 16px;
+}
