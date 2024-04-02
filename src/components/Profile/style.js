@@ -23,9 +23,7 @@ const ProfileParentTitle = styled.div`
 `;
 const ProfileClocks = styled.div``;
 const ProfileTitle = styled.div`
-  display: flex;
   padding-top: 20px;
-
   background-color: gray;
   color: white !important;
 `;
@@ -33,18 +31,15 @@ const ProfileH3 = styled.div`
   font-weight: 600;
   align-self: center;
   font-size: 28px;
-  flex: 4;
-  margin-left: 95px;
-  @media (max-width: 375px) {
-    margin-left: 77px;
-  }
+  text-align: center;
 `;
 const ProfileArrow = styled(ArrowLeftIcon)`
-  color: white !important;
-  align-self: center;
-  flex: 1;
+  color: #fff;
+
+  background-color: #24786d;
+  border-radius: 50%;
   font-size: 1em;
-  margin-right: 10px;
+  margin-left: 20px;
 `;
 const ProfileSignal2 = styled(BookmarkSignal)`
   font-size: 1em;
@@ -64,6 +59,7 @@ const ProfileLoginImg = styled.div`
 const ProfileImgIcon = styled.div`
   width: 100%;
   height: 30%;
+  text-align: center;
 `;
 
 const ProfileLogin = styled.div`

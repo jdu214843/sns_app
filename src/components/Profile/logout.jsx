@@ -9,8 +9,12 @@ const LogOut = () => {
     navigate("/");
   };
 
+  const LogOutStyle = {
+    textAlign: "center",
+  };
+
   return (
-    <div>
+    <div style={LogOutStyle}>
       <Button onClick={handleLogout}>Log Out</Button>
     </div>
   );

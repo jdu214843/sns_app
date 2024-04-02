@@ -87,9 +87,37 @@ const Home = () => {
     setBookMarkPosts(updatedBookmarkedPosts);
   };
 
+  const HomeStyle = {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingTop: "10px",
+  };
+  const InputStyle = {
+    width: "100%",
+    marginLeft: "70px",
+    marginTop: "20px",
+    padding: "20px",
+    outline: "none",
+    border: "1px solid #ccc",
+    borderTopLeftRadius: "5px",
+    borderBottomLeftRadius: "5px",
+    boxSizing: "border-box",
+  };
+
+  const btnStyle = {
+    height: "60px",
+    border: "none",
+    marginRight: "10px",
+    borderRadius: "0px",
+    color: "white",
+    cursor: "pointer",
+    marginTop: "20px",
+    alignSelf: "center",
+  };
   return (
     <HomeParent>
-      <HomeParentTitle>
+      <HomeParentTitle style={HomeStyle}>
         <HomeClocks>
           <StyledIcon>9:41</StyledIcon>
         </HomeClocks>
@@ -109,6 +137,7 @@ const Home = () => {
         <UserIcon />
 
         <Input
+          style={InputStyle}
           type="text"
           maxLength={maxLength}
           value={postText}
@@ -119,6 +148,7 @@ const Home = () => {
           {postText.length}/{maxLength}
         </MaxLengthText>
         <Button
+          style={btnStyle}
           disabled={postText.length === 0}
           onClick={handlePostButtonClick}
         >

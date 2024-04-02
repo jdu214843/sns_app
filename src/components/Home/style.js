@@ -8,61 +8,21 @@ const HomeParent = styled.div`
   width: 100%;
   height: 100%;
 `;
-const HomeParentTitle = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  padding-top: 10px;
-`;
+const HomeParentTitle = styled.div``;
 const HomePost = styled.div`
   display: flex;
   position: relative;
 `;
-const Input = styled.input`
-  width: 100%;
-  margin-left: 70px;
-  margin-top: 20px;
-  margin-right: 40px;
-  padding: 20px;
-  outline: none;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-`;
+const Input = styled.input``;
 
-const Button = styled.button`
-  font-size: 16px;
-  padding: 6px 16px;
-  border: none;
-  border-radius: 12px;
-  color: white;
-  cursor: pointer;
-  position: absolute;
-  top: 40px;
-  left: 320px;
-  @media (min-width: 768px) {
-    left: 650px;
-  }
-  @media (max-width: 414px) {
-    left: 300px;
-  }
-  @media (max-width: 400px) {
-    left: 280px;
-  }
-  @media (max-width: 380px) {
-    left: 265px;
-  }
-  @media (max-width: 360px) {
-    left: 250px;
-  }
-`;
+const Button = styled.button``;
 
 const MaxLengthText = styled.span`
   font-size: 10px;
   color: ${(props) => (props.reached ? "red" : "gray")};
   position: absolute;
   left: 75px;
-  top: 60px;
+  top: 34px;
 `;
 
 const HomeIcons = styled.div`
