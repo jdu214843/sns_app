@@ -89,6 +89,7 @@ app.get("/getLatestFullName", (req, res) => {
   });
 });
 // sign function end
+
 // img upload function start
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

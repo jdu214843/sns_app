@@ -9,7 +9,7 @@ function Validation(values) {
     error.username = "";
   }
   if (values.fullname === "") {
-    error.fullname = "Please enter a valid username";
+    error.fullname = "Please enter a valid fullname";
   } else {
     error.fullname = "";
   }
