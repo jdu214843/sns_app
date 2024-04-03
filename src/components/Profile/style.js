@@ -63,22 +63,34 @@ const ProfileImgIcon = styled.div`
 `;
 
 const ProfileLogin = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
   width: 100%;
   height: 70%;
+  z-index: 1000;
   background-color: white;
   color: #000;
   border-top-left-radius: 50px;
   border-top-right-radius: 50px;
 `;
-const Button = styled.button`
+const LogDiv = styled.div`
+  display: flex;
+  flex-direction: column;
   outline: none;
   border: none;
-  align-items: center;
   margin-left: 20px;
+  margin-bottom: 20px;
+`;
+
+const ProfileDescription = styled.div`
+  margin-left: 20px;
+  margin-top: 20px;
 `;
 
 export {
-  Button,
+  ProfileDescription,
+  LogDiv,
   ProfileBox,
   ProfileClocks,
   ProfileIcon,

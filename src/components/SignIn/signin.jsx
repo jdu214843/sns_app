@@ -63,7 +63,7 @@ const SignIn = () => {
             />
             <span>{errors.email && <span>{errors.email}</span>}</span>
           </div>
-          <div className="inputBox2">
+          <div className="inputBoxSignIn">
             <label htmlFor="password">Password</label>
             <input
               type="password"

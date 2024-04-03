@@ -8,6 +8,11 @@ function Validation(values) {
   } else {
     error.username = "";
   }
+  if (values.fullname === "") {
+    error.fullname = "Please enter a valid username";
+  } else {
+    error.fullname = "";
+  }
   if (values.email === "") {
     error.email = "Please enter a valid email address";
   } else if (!email_pattern.test(values.email)) {

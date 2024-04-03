@@ -48,16 +48,22 @@ label {
 .inputBox {
   display: flex;
   flex-direction: column;
+  margin-bottom: 20px;
+}
+.inputBox1 {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
 }
 .inputBox2 {
   display: flex;
   flex-direction: column;
-  margin-top: 50px;
+  margin-bottom: 20px;
 }
 .inputBox3 {
   display: flex;
   flex-direction: column;
-  margin-top: 50px;
+  margin-bottom: 20px;
 }
 input {
   padding: 5px 15px;
@@ -68,11 +74,12 @@ input {
 span {
   display: flex;
   position: fixed;
-  margin-top: 30px;
+  margin-top: 27px;
+  font-size: 14px;
   color: red;
 }
 .sign_btn {
-  margin-top: 100px;
+  margin-top: 70px;
   padding: 10px;
   border: none;
   outline: none;

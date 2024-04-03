@@ -1,31 +1,39 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Validation from "./SignUpValidation";
 import axios from "axios";
+import Validation from "./SignUpValidation"; // Assuming you have a file named SignUpValidation.js for validation
 import "./signup.css";
+
 const SignUp = () => {
   const [errors, setErrors] = useState({});
 
   const [values, setValues] = useState({
+    fullname: "",
     username: "",
     email: "",
     password: "",
   });
+
   const navigate = useNavigate();
+
   const handleInput = (event) => {
     setValues((prev) => ({
       ...prev,
-      [event.target.name]: [event.target.value],
+      [event.target.name]: event.target.value,
     }));
   };
+
+  const handleValidation = () => {
+    const validationErrors = Validation(values); // Assuming Validation function is correctly defined in SignUpValidation.js
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).every(
+      (key) => validationErrors[key] === ""
+    );
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    setErrors(Validation(values));
-    if (
-      errors.username === "" &&
-      errors.email === "" &&
-      errors.password === ""
-    ) {
+    if (handleValidation()) {
       axios
         .post("http://localhost:8081/signup", values)
         .then((res) => {
@@ -41,13 +49,22 @@ const SignUp = () => {
         <div className="SignUpTitle">
           <p className="titleSignUp">Log in to Chatbox</p>
           <p className="welcome">
-            {" "}
             Get chatting with friends and family <br /> today by signing up for
             our chat app!
           </p>
         </div>
         <form action="" onSubmit={handleSubmit}>
           <div className="inputBox">
+            <label htmlFor="fullname">Full Name</label>
+            <input
+              type="text"
+              placeholder="Enter fullname"
+              onChange={handleInput}
+              name="fullname"
+            />
+            <span>{errors.fullname && <span>{errors.fullname}</span>}</span>
+          </div>
+          <div className="inputBox1">
             <label htmlFor="username">Username</label>
             <input
               type="text"

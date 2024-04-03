@@ -49,10 +49,10 @@ label {
   display: flex;
   flex-direction: column;
 }
-.inputBox2 {
+.inputBoxSignIn {
   display: flex;
   flex-direction: column;
-  margin-top: 50px;
+  margin-top: 35px;
 }
 input {
   padding: 5px 15px;
