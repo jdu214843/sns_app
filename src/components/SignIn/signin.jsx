@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "./SignInValidation.js";
-import axios from "axios";
 import "./signin.css";
-const SignIn = () => {
+
+const SignIn = ({ onSignIn }) => {
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
@@ -14,28 +15,32 @@ const SignIn = () => {
   });
 
   const handleInput = (event) => {
-    setValues((prev) => ({
-      ...prev,
-      [event.target.name]: event.target.value,
+    const { name, value } = event.target;
+    setValues((prevValues) => ({
+      ...prevValues,
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setErrors(Validation(values));
-    if (errors.email === "" && errors.password === "") {
+    const validationErrors = Validation(values);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
       try {
-        const res = await axios
-          .post("http://localhost:8081/signin", values)
-          .then((res) => {
-            if (res.data === "Success") {
-              navigate("/home");
-            } else {
-              alert("No record existed");
-            }
-          });
+        const res = await axios.post("http://localhost:8081/signin", values);
+        if (res.status === 200 && res.data.status === "success") {
+          const { email, fullname } = res.data.user;
+          localStorage.setItem("email", email);
+          localStorage.setItem("fullname", fullname);
+          onSignIn(email, fullname);
+          navigate("/home");
+        } else {
+          alert("No record existed");
+        }
       } catch (err) {
-        console.log(err);
+        console.error("Error signing in:", err);
       }
     }
   };
@@ -46,38 +51,38 @@ const SignIn = () => {
         <div className="LogBoxtitle">
           <p className="logTitle">Log in to Chatbox</p>
           <p className="welcome">
-            {" "}
             Welcome back! Sign in using your social <br /> account or email to
-            continue us
+            continue
           </p>
         </div>
-
-        <form action="" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <div className="inputBox">
             <label htmlFor="email">Email</label>
             <input
               type="email"
               placeholder="Enter email"
               name="email"
+              value={values.email}
               onChange={handleInput}
             />
-            <span>{errors.email && <span>{errors.email}</span>}</span>
+            {errors.email && <span>{errors.email}</span>}
           </div>
           <div className="inputBoxSignIn">
             <label htmlFor="password">Password</label>
             <input
               type="password"
-              name="password"
               placeholder="Enter password"
+              name="password"
+              value={values.password}
               onChange={handleInput}
             />
-            <span>{errors.password && <span>{errors.password}</span>}</span>
+            {errors.password && <span>{errors.password}</span>}
           </div>
           <button className="sign_btn" type="submit">
             Sign In
           </button>
           <p className="or">or</p>
-          <Link to={"/signup"} className="create_account">
+          <Link to="/signup" className="create_account">
             Create Account
           </Link>
         </form>
