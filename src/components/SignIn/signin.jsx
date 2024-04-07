@@ -24,12 +24,16 @@ const SignIn = ({ onSignIn }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log("Form submitted");
     const validationErrors = Validation(values);
+    console.log("Validation errors:", validationErrors);
+
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
       try {
         const res = await axios.post("http://localhost:8081/signin", values);
+        console.log("Sign-in response:", res);
         if (res.status === 200 && res.data.status === "success") {
           const { email, fullname } = res.data.user;
           localStorage.setItem("email", email);
