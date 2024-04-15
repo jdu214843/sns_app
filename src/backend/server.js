@@ -39,55 +39,22 @@ app.post("/signin", (req, res) => {
       return res.json("error");
     }
     if (data.length > 0) {
-      return res.json("Success");
+      let { id, username, fullname, email } = data[0];
+      return res.json({
+        status: "success",
+        user: {
+          id,
+          username,
+          fullname,
+          email,
+        },
+      });
     } else {
       return res.json("Faile");
     }
   });
 });
 
-app.get("/getLatestUsername", (req, res) => {
-  const sql = "SELECT username FROM login ORDER BY id DESC LIMIT 1";
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.status(500).json({ error: "Database error" });
-    } else {
-      if (result.length > 0) {
-        res.json({ username: result[0].username });
-      } else {
-        res.status(404).json({ error: "Username not found" });
-      }
-    }
-  });
-});
-app.get("/getLatestEmail", (req, res) => {
-  const sql = "SELECT email FROM login ORDER BY id DESC LIMIT 1";
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.status(500).json({ error: "Database error" });
-    } else {
-      if (result.length > 0) {
-        res.json({ email: result[0].email });
-      } else {
-        res.status(404).json({ error: "Email not found" });
-      }
-    }
-  });
-});
-app.get("/getLatestFullName", (req, res) => {
-  const sql = "SELECT fullname FROM login ORDER BY id DESC LIMIT 1";
-  db.query(sql, (err, result) => {
-    if (err) {
-      res.status(500).json({ error: "Database error" });
-    } else {
-      if (result.length > 0) {
-        res.json({ fullname: result[0].fullname });
-      } else {
-        res.status(404).json({ error: "fullname not found" });
-      }
-    }
-  });
-});
 // sign function end
 
 // img upload function start

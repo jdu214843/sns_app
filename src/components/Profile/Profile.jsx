@@ -34,8 +34,10 @@ const display_des_style = {
 
 const Profile = () => {
   const [file, setFile] = useState(null);
-  const [email, setEmail] = useState("");
-  const [fullname, setFullname] = useState("");
+  const [email, setEmail] = useState(localStorage.getItem("email") || "");
+  const [fullname, setFullname] = useState(
+    localStorage.getItem("fullname") || ""
+  );
 
   useEffect(() => {
     const fetchUserProfile = async () => {

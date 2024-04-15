@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import Validation from "./SignInValidation.js";
+import Validation from "./SignInValidation";
 import "./signin.css";
 
 const SignIn = ({ onSignIn }) => {
@@ -24,7 +24,6 @@ const SignIn = ({ onSignIn }) => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Form submitted");
     const validationErrors = Validation(values);
     console.log("Validation errors:", validationErrors);
 
@@ -35,16 +34,19 @@ const SignIn = ({ onSignIn }) => {
         const res = await axios.post("http://localhost:8081/signin", values);
         console.log("Sign-in response:", res);
         if (res.status === 200 && res.data.status === "success") {
-          const { email, fullname } = res.data.user;
+          const { id, username, email, fullname } = res.data.user;
           localStorage.setItem("email", email);
           localStorage.setItem("fullname", fullname);
-          onSignIn(email, fullname);
+          // onSignIn(email, fullname);
+          console.log(0);
           navigate("/home");
+          console.log(1);
         } else {
           alert("No record existed");
         }
       } catch (err) {
-        console.error("Error signing in:", err);
+        console.error("Error signing in:", err); // Handle error
+        alert("An error occurred while signing in. Please try again later.");
       }
     }
   };
