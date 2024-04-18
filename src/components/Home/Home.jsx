@@ -1,10 +1,10 @@
-import React, { useState } from "react";
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
+import React, { useState } from "react";
 import {
-  HomeClocks,
   HomeParent,
   HomePost,
   HomeParentTitle,
+  HomeClocks,
   HomeIcons,
   Input,
   Button,
@@ -23,6 +23,7 @@ import {
   FavoriteIconStyle,
   CommentIconStyle,
   BookmarkIconStyle,
+  CrudBtn,
 } from "./style";
 import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
 import WifiIcon from "@mui/icons-material/Wifi";
@@ -30,63 +31,86 @@ import BatteryFullIcon from "@mui/icons-material/BatteryFull";
 
 const Home = () => {
   const [postText, setPostText] = useState("");
-  const maxLength = 140;
   const [displayedText, setDisplayedText] = useState([]);
+  const [replies, setReplies] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
-  const [BookMarkPosts, setBookMarkPosts] = useState([]);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  const [currentPostIndex, setCurrentPostIndex] = useState(null);
+  const [replyText, setReplyText] = useState({});
+  const [replyingToPost, setReplyingToPost] = useState(null); // New state for tracking reply state
 
+  const maxLength = 140;
+
+  // Handle changes in the post text input
   const handleInputChange = (e) => {
     if (e.target.value.length <= maxLength) {
       setPostText(e.target.value);
     }
   };
 
+  // Handle the posting of new posts
   const handlePostButtonClick = () => {
-    setDisplayedText([...displayedText, postText]);
+    if (currentPostIndex !== null) {
+      const updatedPosts = [...displayedText];
+      updatedPosts[currentPostIndex] = postText;
+      setDisplayedText(updatedPosts);
+      setCurrentPostIndex(null);
+    } else {
+      setDisplayedText([...displayedText, postText]);
+      setReplies([...replies, []]); // Initialize a new replies array for the new post
+    }
     setPostText("");
   };
 
+  // Handle liking of posts
   const handleLikeClick = (index) => {
-    if (likedPosts[index]) {
-      const updatedLikedPosts = [...likedPosts];
-      updatedLikedPosts[index] = false;
-      setLikedPosts(updatedLikedPosts);
+    const updatedLikedPosts = [...likedPosts];
+    updatedLikedPosts[index] = !updatedLikedPosts[index];
+    setLikedPosts(updatedLikedPosts);
+  };
 
-      showNotification("Disliked");
-    } else {
-      const updatedLikedPosts = [...likedPosts];
-      updatedLikedPosts[index] = true;
-      setLikedPosts(updatedLikedPosts);
+  // Handle bookmarking of posts
+  const handleBookmarkClick = (index) => {
+    const updatedBookmarkedPosts = [...bookmarkedPosts];
+    updatedBookmarkedPosts[index] = !updatedBookmarkedPosts[index];
+    setBookmarkedPosts(updatedBookmarkedPosts);
+  };
 
-      showNotification("Liked");
+  // Handle changes in the reply input
+  const handleReplyTextChange = (index, text) => {
+    const updatedReplyText = { ...replyText };
+    updatedReplyText[index] = text;
+    setReplyText(updatedReplyText);
+  };
+
+  // Handle submission of replies
+  const handleReplySubmit = (index) => {
+    if (replyText[index] && replyText[index].trim()) {
+      const updatedReplies = [...replies];
+      if (!updatedReplies[index]) {
+        updatedReplies[index] = [];
+      }
+      updatedReplies[index].push(replyText[index].trim());
+      setReplies(updatedReplies);
+      setReplyText((prev) => ({ ...prev, [index]: "" }));
+      setReplyingToPost(null); // Reset the reply state after submitting
     }
   };
 
-  const showNotification = (message) => {
-    const notification = document.createElement("div");
-    notification.textContent = message;
-    notification.classList.add("notification");
-
-    document.body.appendChild(notification);
-
-    notification.getBoundingClientRect();
-
-    notification.classList.add("show");
-
-    setTimeout(() => {
-      notification.classList.remove("show");
-      setTimeout(() => {
-        document.body.removeChild(notification);
-      }, 500);
-    }, 1000);
+  // Handle editing of posts
+  const handleEditClick = (index) => {
+    setCurrentPostIndex(index);
+    setPostText(displayedText[index]);
   };
 
-  const handleBookMarkClick = (index) => {
-    const updatedBookmarkedPosts = [...BookMarkPosts];
-    updatedBookmarkedPosts[index] = !updatedBookmarkedPosts[index];
-    setBookMarkPosts(updatedBookmarkedPosts);
+  // Handle deletion of posts
+  const handleDeleteClick = (index) => {
+    const updatedPosts = displayedText.filter((_, i) => i !== index);
+    setDisplayedText(updatedPosts);
+    setLikedPosts((prev) => prev.filter((_, i) => i !== index));
+    setBookmarkedPosts((prev) => prev.filter((_, i) => i !== index));
+    setReplies((prev) => prev.filter((_, i) => i !== index));
   };
-
   const HomeStyle = {
     display: "flex",
     flexDirection: "row",
@@ -133,9 +157,9 @@ const Home = () => {
           </StyledIcon>
         </HomeIcons>
       </HomeParentTitle>
+
       <HomePost>
         <UserIcon />
-
         <Input
           style={InputStyle}
           type="text"
@@ -152,33 +176,75 @@ const Home = () => {
           disabled={postText.length === 0}
           onClick={handlePostButtonClick}
         >
-          Post
+          {currentPostIndex !== null ? "Update" : "Post"}
         </Button>
       </HomePost>
+
       <PostContainer>
         {displayedText.map((text, index) => (
           <PostText key={index}>
             <PostUserContainer>
               <MeatBox>
                 <UserIcon2 />
-                <UserNiceNameContainer>Asilbek Boysoatov</UserNiceNameContainer>
+                <UserNiceNameContainer>Username</UserNiceNameContainer>
               </MeatBox>
-              <HorizontalMeatballIcon />
+              <HorizontalMeatballIcon
+                onClick={() => {
+                  const CrudElement = document.getElementById(
+                    `CrudElementBtn-${index}`
+                  );
+                  CrudElement.style.display =
+                    CrudElement.style.display === "none" ? "block" : "none";
+                }}
+              />
+              <CrudBtn
+                id={`CrudElementBtn-${index}`}
+                style={{ display: "none" }}
+              >
+                <button onClick={() => handleEditClick(index)}>Edit</button>
+                <button onClick={() => handleDeleteClick(index)}>Delete</button>
+              </CrudBtn>
             </PostUserContainer>
+
             <PostTextContainer>{text}</PostTextContainer>
+
             <IconContainer>
               <StyledIconButton>
                 <FavoriteIconStyle
                   onClick={() => handleLikeClick(index)}
                   style={{ color: likedPosts[index] ? "red" : "inherit" }}
                 />
-                <CommentIconStyle />
+                {/* Toggle reply input on CommentIconStyle click */}
+                <CommentIconStyle onClick={() => setReplyingToPost(index)} />
               </StyledIconButton>
               <BookmarkIconStyle
-                onClick={() => handleBookMarkClick(index)}
-                style={{ color: BookMarkPosts[index] ? "blue" : "inherit" }}
+                onClick={() => handleBookmarkClick(index)}
+                style={{ color: bookmarkedPosts[index] ? "blue" : "inherit" }}
               />
             </IconContainer>
+
+            {/* Display replies */}
+            <div>
+              {replies[index] &&
+                replies[index].map((reply, replyIndex) => (
+                  <div key={replyIndex}>
+                    <p>{reply}</p>
+                  </div>
+                ))}
+            </div>
+
+            {/* Reply input */}
+            {replyingToPost === index && (
+              <div>
+                <Input
+                  type="text"
+                  value={replyText[index] || ""}
+                  onChange={(e) => handleReplyTextChange(index, e.target.value)}
+                  placeholder="Write a reply..."
+                />
+                <Button onClick={() => handleReplySubmit(index)}>Reply</Button>
+              </div>
+            )}
           </PostText>
         ))}
       </PostContainer>

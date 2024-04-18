@@ -31,15 +31,24 @@ const SignUp = () => {
     );
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (handleValidation()) {
-      axios
-        .post("http://localhost:8081/signup", values)
-        .then((res) => {
-          navigate("/");
-        })
-        .catch((err) => console.log(err));
+      try {
+        const res = await axios.post("http://localhost:8081/signup", values);
+        navigate("/");
+      } catch (err) {
+        if (err.response) {
+          console.error(`Error: ${err.response.status}`);
+          alert("Server error: " + err.response.data);
+        } else if (err.request) {
+          console.error("Network error: No response received.");
+          alert("Unable to connect to server. Please try again later.");
+        } else {
+          console.error("An unexpected error occurred: " + err.message);
+          alert("An unexpected error occurred: " + err.message);
+        }
+      }
     }
   };
 

@@ -102,7 +102,13 @@ const UserNiceNameContainer = styled.div`
 const HorizontalMeatballIcon = styled(MeatballIcon)({
   transform: "rotate(-90deg)",
   marginRight: "15px",
+  border: "1px solid #ccc",
+  borderRadius: "16px",
 });
+
+const CrudBtn = styled.div`
+  flex-direction: column;
+`;
 const MeatBox = styled.div`
   display: flex;
 `;
@@ -138,4 +144,5 @@ export {
   FavoriteIconStyle,
   CommentIconStyle,
   BookmarkIconStyle,
+  CrudBtn,
 };

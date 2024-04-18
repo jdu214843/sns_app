@@ -37,10 +37,10 @@ const SignIn = ({ onSignIn }) => {
           const { id, username, email, fullname } = res.data.user;
           localStorage.setItem("email", email);
           localStorage.setItem("fullname", fullname);
-          // onSignIn(email, fullname);
-          console.log(0);
+
+          // console.log(0);
           navigate("/home");
-          console.log(1);
+          // console.log(1);
         } else {
           alert("No record existed");
         }

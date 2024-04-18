@@ -6,10 +6,11 @@ import React, { useState, useEffect } from "react";
 
 const LogOut = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || ""
+  );
 
   useEffect(() => {
-    // Fetch username from localStorage
     const storedUsername = localStorage.getItem("username");
     if (storedUsername) {
       setUsername(storedUsername);
