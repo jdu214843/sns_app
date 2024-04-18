@@ -84,15 +84,35 @@ const NavigationBar = () => {
 };
 
 const App = () => {
+  const [displayedText, setDisplayedText] = useState([]);
+  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
   return (
     <Router>
       <Container>
         <Routes>
           <Route exact path="/" element={<SignIn />} />
           <Route exact path="/signup" element={<SignUp />} />
-          <Route path="/home" element={<Home />} />
+          <Route
+            path="/home"
+            element={
+              <Home
+                displayedText={displayedText}
+                setDisplayedText={setDisplayedText}
+                bookmarkedPosts={bookmarkedPosts}
+                setBookmarkedPosts={setBookmarkedPosts}
+              />
+            }
+          />
           <Route path="/messages" element={<Massages />} />
-          <Route path="/bookmark" element={<Bookmark />} />
+          <Route
+            path="/bookmark"
+            element={
+              <Bookmark
+                bookmarkedPosts={bookmarkedPosts}
+                setBookmarkedPosts={setBookmarkedPosts}
+              />
+            }
+          />
           <Route path="/profile" element={<Profile />} />
         </Routes>
 

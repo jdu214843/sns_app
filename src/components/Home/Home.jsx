@@ -29,12 +29,12 @@ import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
 import WifiIcon from "@mui/icons-material/Wifi";
 import BatteryFullIcon from "@mui/icons-material/BatteryFull";
 
-const Home = () => {
+const Home = ({displayedText, setDisplayedText,bookmarkedPosts,setBookmarkedPosts}) => {
   const [postText, setPostText] = useState("");
-  const [displayedText, setDisplayedText] = useState([]);
+  
   const [replies, setReplies] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
-  const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  
   const [currentPostIndex, setCurrentPostIndex] = useState(null);
   const [replyText, setReplyText] = useState({});
   const [replyingToPost, setReplyingToPost] = useState(null); // New state for tracking reply state
@@ -72,7 +72,17 @@ const Home = () => {
   // Handle bookmarking of posts
   const handleBookmarkClick = (index) => {
     const updatedBookmarkedPosts = [...bookmarkedPosts];
-    updatedBookmarkedPosts[index] = !updatedBookmarkedPosts[index];
+    displayedText.map((text, id) => {
+      if (index == id) {
+        if (updatedBookmarkedPosts[index]){
+          updatedBookmarkedPosts.splice(index,1);
+        } else {
+          updatedBookmarkedPosts[index] = text;
+        }
+        
+      }
+    })
+    // updatedBookmarkedPosts[index] = !updatedBookmarkedPosts[index];
     setBookmarkedPosts(updatedBookmarkedPosts);
   };
 
@@ -214,7 +224,7 @@ const Home = () => {
                   onClick={() => handleLikeClick(index)}
                   style={{ color: likedPosts[index] ? "red" : "inherit" }}
                 />
-                {/* Toggle reply input on CommentIconStyle click */}
+
                 <CommentIconStyle onClick={() => setReplyingToPost(index)} />
               </StyledIconButton>
               <BookmarkIconStyle
