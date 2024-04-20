@@ -75,7 +75,7 @@ const Profile = () => {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((response) => {
-        console.log("Image uploaded successfully");
+        console.log("Image uploaded successfully", response);
       })
       .catch((error) => {
         console.error("Error uploading image:", error);
