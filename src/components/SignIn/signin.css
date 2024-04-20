@@ -63,7 +63,7 @@ input {
 span {
   display: flex;
   position: fixed;
-  margin-top: 30px;
+  margin-top: 55px;
   color: red;
 }
 .sign_btn {
