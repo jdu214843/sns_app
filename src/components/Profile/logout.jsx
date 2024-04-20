@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { LogDiv } from "./style";
+import { LogDiv, LogOutDiv } from "./style";
 
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 
 const LogOut = () => {
@@ -18,22 +17,28 @@ const LogOut = () => {
   }, []);
 
   const handleLogout = () => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      localStorage.removeItem("username");
+      localStorage.removeItem("email");
+      localStorage.removeItem("password");
+      localStorage.removeItem("fullname");
+    }
+
     navigate("/");
   };
 
-  const LogOutStyle = {};
-
   return (
-    <div style={LogOutStyle}>
-      <LogDiv onClick={handleLogout}>
+    <div>
+      <LogDiv>
         <div className="change_password">
           <h4 style={{ color: "black" }}>Change password</h4>
           <h5 style={{ color: "#797C7B", paddingBottom: "15px" }}>
             Privacy, security, change number
           </h5>
         </div>
-        <div className="log_out">
-          <h4 style={{ color: "black", cursor: "pointer" }}>Log Out</h4>
+        <div className="log_out" onClick={handleLogout}>
+          <LogOutDiv>Log Out</LogOutDiv>
 
           <h5 style={{ color: "#797C7B", cursor: "pointer" }}>
             {username && `Logged in as: ${username}`}

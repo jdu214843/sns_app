@@ -34,8 +34,8 @@ const SignUp = () => {
     if (handleValidation()) {
       try {
         const res = await axios.post("http://localhost:8081/signup", values);
-        localStorage.setItem("userPassword", values.password);
-        localStorage.setItem("userFullname", values.fullname);
+        localStorage.setItem("password", values.password);
+        localStorage.setItem("fullname", values.fullname);
         localStorage.setItem("username", values.username);
 
         navigate("/");

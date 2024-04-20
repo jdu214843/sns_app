@@ -88,6 +88,15 @@ const ProfileDescription = styled.div`
   margin-top: 20px;
 `;
 
+const LogOutDiv = styled.div`
+  color: black;
+  cursor: pointer;
+  font-weight: 600;
+  &:hover {
+    transition: all 0.3s ease;
+    color: red;
+  }
+`;
 export {
   ProfileDescription,
   LogDiv,
@@ -104,4 +113,5 @@ export {
   ProfileLogin,
   ProfileLoginImg,
   ProfileImgIcon,
+  LogOutDiv,
 };
