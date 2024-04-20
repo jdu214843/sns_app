@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { IconButton } from "@mui/material";
+import { IconButton, linearProgressClasses } from "@mui/material";
 import MeatballIcon from "@mui/icons-material/MoreVert";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import CommentIcon from "@mui/icons-material/Comment";
@@ -104,10 +104,18 @@ const HorizontalMeatballIcon = styled(MeatballIcon)({
   marginRight: "15px",
   border: "1px solid #ccc",
   borderRadius: "16px",
+  cursor: "pointer", // Add cursor pointer to indicate it's clickable
+  "&:hover": {
+    transition: "all .3s ease",
+    color: "#fff",
+    backgroundColor: "gray", // Change background color on hover
+  },
 });
 
 const CrudBtn = styled.div`
+  display: flex;
   flex-direction: column;
+  margin-top: 2px;
 `;
 const MeatBox = styled.div`
   display: flex;

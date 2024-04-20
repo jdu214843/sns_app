@@ -20,15 +20,15 @@ import {
   ProfileDescription,
 } from "./style";
 
-const display_style = {
+const displayStyle = {
   color: "#797C7B",
   fontSize: "14px",
   fontFamily: "Poppins",
 };
-const display_des_style = {
+const displayDesStyle = {
   fontSize: "18px",
   fontFamily: "Poppins",
-  fontWeight: "bold", // Changed from fontweight to fontWeight
+  fontWeight: "bold",
   paddingBottom: "15px",
 };
 
@@ -38,19 +38,24 @@ const Profile = () => {
   const [fullname, setFullname] = useState(
     localStorage.getItem("fullname") || ""
   );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/user/profile", {
+        const response = await axios.get("http://localhost:8081/profile", {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
         setEmail(response.data.email);
         setFullname(response.data.fullname);
+        setLoading(false);
       } catch (error) {
         console.error("Error fetching user profile:", error);
+        setError(error.message || "Error fetching user profile");
+        setLoading(false);
       }
     };
 
@@ -76,6 +81,9 @@ const Profile = () => {
         console.error("Error uploading image:", error);
       });
   };
+
+  if (loading) return <div>Loading...</div>;
+  // if (error) return <div>Error: {error}</div>;
 
   return (
     <ProfileBox>
@@ -107,12 +115,12 @@ const Profile = () => {
         <ProfileLogin>
           <ProfileDescription>
             <div className="display_name">
-              <h4 style={display_style}>Display Name</h4>
-              <h2 style={display_des_style}>{fullname}</h2>
+              <h4 style={displayStyle}>Display Name</h4>
+              <h2 style={displayDesStyle}>{fullname}</h2>
             </div>
             <div className="display_email">
-              <h4 style={display_style}>Email Address</h4>
-              <h2 style={display_des_style}>{email}</h2>
+              <h4 style={displayStyle}>Email Address</h4>
+              <h2 style={displayDesStyle}>{email}</h2>
             </div>
           </ProfileDescription>
           <LogOut />

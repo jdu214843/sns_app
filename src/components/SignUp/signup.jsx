@@ -26,9 +26,7 @@ const SignUp = () => {
   const handleValidation = () => {
     const validationErrors = Validation(values); // Assuming Validation function is correctly defined in SignUpValidation.js
     setErrors(validationErrors);
-    return Object.keys(validationErrors).every(
-      (key) => validationErrors[key] === ""
-    );
+    return Object.values(validationErrors).every((error) => !error);
   };
 
   const handleSubmit = async (event) => {
@@ -36,6 +34,10 @@ const SignUp = () => {
     if (handleValidation()) {
       try {
         const res = await axios.post("http://localhost:8081/signup", values);
+        localStorage.setItem("userPassword", values.password);
+        localStorage.setItem("userFullname", values.fullname);
+        localStorage.setItem("username", values.username);
+
         navigate("/");
       } catch (err) {
         if (err.response) {
@@ -62,7 +64,7 @@ const SignUp = () => {
             our chat app!
           </p>
         </div>
-        <form action="" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <div className="inputBox">
             <label htmlFor="fullname">Full Name</label>
             <input
@@ -70,8 +72,9 @@ const SignUp = () => {
               placeholder="Enter fullname"
               onChange={handleInput}
               name="fullname"
+              value={values.fullname}
             />
-            <span>{errors.fullname && <span>{errors.fullname}</span>}</span>
+            {errors.fullname && <span>{errors.fullname}</span>}
           </div>
           <div className="inputBox1">
             <label htmlFor="username">Username</label>
@@ -80,8 +83,9 @@ const SignUp = () => {
               placeholder="Enter username"
               onChange={handleInput}
               name="username"
+              value={values.username}
             />
-            <span>{errors.username && <span>{errors.username}</span>}</span>
+            {errors.username && <span>{errors.username}</span>}
           </div>
           <div className="inputBox2">
             <label htmlFor="email">Email</label>
@@ -90,8 +94,9 @@ const SignUp = () => {
               placeholder="Enter email"
               onChange={handleInput}
               name="email"
+              value={values.email}
             />
-            <span>{errors.email && <span>{errors.email}</span>}</span>
+            {errors.email && <span>{errors.email}</span>}
           </div>
           <div className="inputBox3">
             <label htmlFor="password">Password</label>
@@ -100,8 +105,9 @@ const SignUp = () => {
               placeholder="Enter password"
               onChange={handleInput}
               name="password"
+              value={values.password}
             />
-            <span>{errors.password && <span>{errors.password}</span>}</span>
+            {errors.password && <span>{errors.password}</span>}
           </div>
           <button className="sign_btn" type="submit">
             Sign Up

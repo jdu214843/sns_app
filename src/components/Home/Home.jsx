@@ -29,12 +29,18 @@ import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
 import WifiIcon from "@mui/icons-material/Wifi";
 import BatteryFullIcon from "@mui/icons-material/BatteryFull";
 
-const Home = ({displayedText, setDisplayedText,bookmarkedPosts,setBookmarkedPosts}) => {
+const Home = ({
+  displayedText,
+  setDisplayedText,
+  bookmarkedPosts,
+  setBookmarkedPosts,
+}) => {
   const [postText, setPostText] = useState("");
-  
+  const [isDropdownOpen, setIsDropdownOpen] = useState(null);
+
   const [replies, setReplies] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
-  
+
   const [currentPostIndex, setCurrentPostIndex] = useState(null);
   const [replyText, setReplyText] = useState({});
   const [replyingToPost, setReplyingToPost] = useState(null); // New state for tracking reply state
@@ -46,6 +52,11 @@ const Home = ({displayedText, setDisplayedText,bookmarkedPosts,setBookmarkedPost
     if (e.target.value.length <= maxLength) {
       setPostText(e.target.value);
     }
+  };
+
+  const toggleDropdown = (index) => {
+    // Toggle the dropdown for the clicked post index
+    setIsDropdownOpen(isDropdownOpen === index ? null : index);
   };
 
   // Handle the posting of new posts
@@ -74,14 +85,13 @@ const Home = ({displayedText, setDisplayedText,bookmarkedPosts,setBookmarkedPost
     const updatedBookmarkedPosts = [...bookmarkedPosts];
     displayedText.map((text, id) => {
       if (index == id) {
-        if (updatedBookmarkedPosts[index]){
-          updatedBookmarkedPosts.splice(index,1);
+        if (updatedBookmarkedPosts[index]) {
+          updatedBookmarkedPosts.splice(index, 1);
         } else {
           updatedBookmarkedPosts[index] = text;
         }
-        
       }
-    })
+    });
     // updatedBookmarkedPosts[index] = !updatedBookmarkedPosts[index];
     setBookmarkedPosts(updatedBookmarkedPosts);
   };
@@ -137,6 +147,12 @@ const Home = ({displayedText, setDisplayedText,bookmarkedPosts,setBookmarkedPost
     borderTopLeftRadius: "5px",
     borderBottomLeftRadius: "5px",
     boxSizing: "border-box",
+  };
+
+  const drop_btn_style = {
+    margin: "2px",
+    border: "none",
+    outline: "none",
   };
 
   const btnStyle = {
@@ -196,24 +212,31 @@ const Home = ({displayedText, setDisplayedText,bookmarkedPosts,setBookmarkedPost
             <PostUserContainer>
               <MeatBox>
                 <UserIcon2 />
-                <UserNiceNameContainer>Username</UserNiceNameContainer>
+                <UserNiceNameContainer>username</UserNiceNameContainer>
               </MeatBox>
-              <HorizontalMeatballIcon
-                onClick={() => {
-                  const CrudElement = document.getElementById(
-                    `CrudElementBtn-${index}`
-                  );
-                  CrudElement.style.display =
-                    CrudElement.style.display === "none" ? "block" : "none";
-                }}
-              />
-              <CrudBtn
-                id={`CrudElementBtn-${index}`}
-                style={{ display: "none" }}
-              >
-                <button onClick={() => handleEditClick(index)}>Edit</button>
-                <button onClick={() => handleDeleteClick(index)}>Delete</button>
-              </CrudBtn>
+              <div style={{ position: "relative" }}>
+                <HorizontalMeatballIcon onClick={() => toggleDropdown(index)} />
+                {/* Position the CrudBtn absolutely */}
+                {isDropdownOpen === index && (
+                  <CrudBtn
+                    id={`CrudElementBtn-${index}`}
+                    style={{ position: "absolute", top: "20px", right: "20px" }}
+                  >
+                    <button
+                      style={drop_btn_style}
+                      onClick={() => handleEditClick(index)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      style={drop_btn_style}
+                      onClick={() => handleDeleteClick(index)}
+                    >
+                      Delete
+                    </button>
+                  </CrudBtn>
+                )}
+              </div>
             </PostUserContainer>
 
             <PostTextContainer>{text}</PostTextContainer>
