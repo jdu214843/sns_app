@@ -1,7 +1,5 @@
-import React from "react";
-
+import React, { useState } from "react";
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
-
 import {
   BookmarkClocks,
   BookmarkIcon,
@@ -12,13 +10,32 @@ import {
   BookmarkSignal2,
   BookmarkFull2,
   BookmarkWife2,
+  MetBookmark,
+  UserNiceParent,
+  BookPost,
+  DeleteIcon1,
 } from "./style";
+import {
+  PostUserContainer,
+  UserIcon2,
+  UserNiceNameContainer,
+} from "../Home/style";
 
 const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || ""
+  );
+
   const handleUnbookmark = (index) => {
     const updatedBookmarkedPosts = [...bookmarkedPosts];
     updatedBookmarkedPosts.splice(index, 1);
     setBookmarkedPosts(updatedBookmarkedPosts);
+  };
+
+  const buttonParent = {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
   };
 
   return (
@@ -48,11 +65,21 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
         {bookmarkedPosts.length > 0 ? (
           bookmarkedPosts.map((post, index) => (
             <div key={index}>
-              <p>{post}</p>
+              <PostUserContainer>
+                <MetBookmark>
+                  <UserNiceParent>
+                    <UserIcon2 />
+                    <UserNiceNameContainer>{username}</UserNiceNameContainer>
+                  </UserNiceParent>
 
-              <button onClick={() => handleUnbookmark(index)}>
-                Unbookmark
-              </button>
+                  <div style={buttonParent}>
+                    <BookPost>{post}</BookPost>
+                    <button onClick={() => handleUnbookmark(index)}>
+                      <DeleteIcon1 />
+                    </button>
+                  </div>
+                </MetBookmark>
+              </PostUserContainer>
             </div>
           ))
         ) : (

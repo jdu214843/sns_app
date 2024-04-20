@@ -3,6 +3,8 @@ import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import BookmarkSignal from "@mui/icons-material/SignalCellularAlt";
 import WifiIcon from "@mui/icons-material/Wifi";
 import BatteryFullIcon from "@mui/icons-material/BatteryFull";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 const BookmarkIcon = styled.div`
   display: flex;
   font-weight: 600;
@@ -43,8 +45,24 @@ const BookmarkWife2 = styled(WifiIcon)`
 const BookmarkFull2 = styled(BatteryFullIcon)`
   font-size: 1em;
 `;
+const MetBookmark = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+const UserNiceParent = styled.div`
+  display: flex;
+  margin-top: 10px;
+`;
+const BookPost = styled.div`
+  margin-left: 50px;
+`;
+const DeleteIcon1 = styled(DeleteIcon)``;
 
 export {
+  DeleteIcon1,
+  BookPost,
+  UserNiceParent,
+  MetBookmark,
   BookmarkIcon,
   BookmarkParentTitle,
   BookmarkClocks,

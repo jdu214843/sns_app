@@ -45,6 +45,10 @@ const Home = ({
   const [replyText, setReplyText] = useState({});
   const [replyingToPost, setReplyingToPost] = useState(null); // New state for tracking reply state
 
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || ""
+  );
+
   const maxLength = 140;
 
   // Handle changes in the post text input
@@ -53,6 +57,7 @@ const Home = ({
       setPostText(e.target.value);
     }
   };
+  
 
   const toggleDropdown = (index) => {
     // Toggle the dropdown for the clicked post index
@@ -117,6 +122,9 @@ const Home = ({
     }
   };
 
+  const handleReplyIconClick = (index) => {
+    setReplyingToPost((prevIndex) => (prevIndex === index ? null : index));
+  };
   // Handle editing of posts
   const handleEditClick = (index) => {
     setCurrentPostIndex(index);
@@ -212,7 +220,7 @@ const Home = ({
             <PostUserContainer>
               <MeatBox>
                 <UserIcon2 />
-                <UserNiceNameContainer>username</UserNiceNameContainer>
+                <UserNiceNameContainer>{username}</UserNiceNameContainer>
               </MeatBox>
               <div style={{ position: "relative" }}>
                 <HorizontalMeatballIcon onClick={() => toggleDropdown(index)} />
@@ -242,13 +250,25 @@ const Home = ({
             <PostTextContainer>{text}</PostTextContainer>
 
             <IconContainer>
-              <StyledIconButton>
+              {/* <StyledIconButton>
                 <FavoriteIconStyle
                   onClick={() => handleLikeClick(index)}
                   style={{ color: likedPosts[index] ? "red" : "inherit" }}
                 />
 
                 <CommentIconStyle onClick={() => setReplyingToPost(index)} />
+              </StyledIconButton> */}
+              <StyledIconButton>
+                <FavoriteIconStyle
+                  onClick={() => handleLikeClick(index)}
+                  style={{ color: likedPosts[index] ? "red" : "inherit" }}
+                />
+                <CommentIconStyle
+                  onClick={() => handleReplyIconClick(index)} // Change the onClick handler to handleReplyIconClick
+                  style={{
+                    color: replyingToPost === index ? "blue" : "inherit",
+                  }} // Change the color based on whether the reply part is open
+                />
               </StyledIconButton>
               <BookmarkIconStyle
                 onClick={() => handleBookmarkClick(index)}
