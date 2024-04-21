@@ -48,6 +48,7 @@ const BookmarkFull2 = styled(BatteryFullIcon)`
 const MetBookmark = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
 `;
 const UserNiceParent = styled.div`
   display: flex;
@@ -55,6 +56,8 @@ const UserNiceParent = styled.div`
 `;
 const BookPost = styled.div`
   margin-left: 50px;
+
+  align-self: center;
 `;
 const DeleteIcon1 = styled(DeleteIcon)``;
 

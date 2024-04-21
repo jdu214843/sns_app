@@ -38,6 +38,14 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     justifyContent: "space-between",
   };
 
+  const BtnBookMarkStyle = {
+    marginRight: "10px",
+    marginLeft: "10px",
+    height: "40px",
+
+    alignSelf: "center",
+  };
+
   return (
     <div>
       <BookmarkParentTitle>
@@ -74,7 +82,10 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
                   <div style={buttonParent}>
                     <BookPost>{post}</BookPost>
-                    <button onClick={() => handleUnbookmark(index)}>
+                    <button
+                      style={BtnBookMarkStyle}
+                      onClick={() => handleUnbookmark(index)}
+                    >
                       <DeleteIcon1 />
                     </button>
                   </div>

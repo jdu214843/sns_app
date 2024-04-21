@@ -87,6 +87,7 @@ const PostTextContainer = styled.div`
 const PostUserContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  width: 100%;
 `;
 const UserNiceNameContainer = styled.div`
   font-size: 16px;
