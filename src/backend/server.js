@@ -13,51 +13,44 @@ const db = mysql.createConnection({
   password: "asilbek",
   database: "signup",
 });
-// signi function started
+
+// Sign up
 app.post("/signup", (req, res) => {
+  const { fullname, username, email, password } = req.body;
   const sql =
-    "INSERT INTO login (`fullname`,`username`, `email`, `password`) VALUES (?)";
-  const values = [
-    req.body.fullname,
-    req.body.username,
-    req.body.email,
-    req.body.password,
-  ];
-  db.query(sql, [values], (err, data) => {
+    "INSERT INTO login (`fullname`, `username`, `email`, `password`) VALUES (?, ?, ?, ?)";
+  const values = [fullname, username, email, password];
+  db.query(sql, values, (err, result) => {
     if (err) {
-      return res.json("error");
+      console.error("Error signing up:", err);
+      return res.status(500).json({ error: "Error signing up" });
     }
-    return res.json(data);
+    return res.json({ message: "Signed up successfully" });
   });
 });
 
+// Sign in
 app.post("/signin", (req, res) => {
+  const { email, password } = req.body;
   const sql = "SELECT * FROM login WHERE `email` = ? AND `password` = ?";
-
-  db.query(sql, [req.body.email, req.body.password], (err, data) => {
+  db.query(sql, [email, password], (err, data) => {
     if (err) {
-      return res.json("error");
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
     }
     if (data.length > 0) {
-      let { id, username, fullname, email } = data[0];
+      const { id, username, fullname, email } = data[0];
       return res.json({
         status: "success",
-        user: {
-          id,
-          username,
-          fullname,
-          email,
-        },
+        user: { id, username, fullname, email },
       });
     } else {
-      return res.json("Faile");
+      return res.status(404).json({ error: "User not found" });
     }
   });
 });
 
-// sign function end
-
-// img upload function start
+// Upload image
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -73,10 +66,19 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
   if (!req.file) {
     return res.status(400).send("No files were uploaded.");
   }
-  return res.send("File uploaded successfully.");
+  const imageUrl = req.file.path;
+
+  const sql = "INSERT INTO imgs (image_url) VALUES (?)";
+  db.query(sql, [imageUrl], (err, result) => {
+    if (err) {
+      console.error("Error saving image URL to database:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    console.log("Image URL saved to database");
+    return res.status(200).json({ message: "Image URL saved to database" });
+  });
 });
-// img upload function end
 
 app.listen(8081, () => {
-  console.log("connection established");
+  console.log("Server is running on port 8081");
 });

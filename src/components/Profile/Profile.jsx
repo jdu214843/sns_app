@@ -76,14 +76,26 @@ const Profile = () => {
       })
       .then((response) => {
         console.log("Image uploaded successfully", response);
+        const imageUrl = response.data.imageUrl;
+        saveImageUrl(imageUrl); // Faylning URL manzilini ma'lumotlar bazasiga saqlash
       })
       .catch((error) => {
         console.error("Error uploading image:", error);
       });
   };
 
+  const saveImageUrl = (imageUrl) => {
+    axios
+      .post("http://localhost:8081/saveImageUrl", { imageUrl })
+      .then((response) => {
+        console.log("Image URL saved to database", response);
+      })
+      .catch((error) => {
+        console.error("Error saving image URL:", error);
+      });
+  };
+
   if (loading) return <div>Loading...</div>;
-  // if (error) return <div>Error: {error}</div>;
 
   return (
     <ProfileBox>
@@ -110,7 +122,12 @@ const Profile = () => {
       <ProfileLoginImg>
         <ProfileImgIcon>
           <input type="file" onChange={handleFileChange} />
-          <button onClick={handleUpload}>Upload Image</button>
+          <button
+            style={{ width: "100px", padding: "5px", marginTop: "5px" }}
+            onClick={handleUpload}
+          >
+            Add Img
+          </button>
         </ProfileImgIcon>
         <ProfileLogin>
           <ProfileDescription>

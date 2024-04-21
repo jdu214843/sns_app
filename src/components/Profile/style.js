@@ -59,7 +59,11 @@ const ProfileLoginImg = styled.div`
 const ProfileImgIcon = styled.div`
   width: 100%;
   height: 30%;
+
   text-align: center;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
 `;
 
 const ProfileLogin = styled.div`
