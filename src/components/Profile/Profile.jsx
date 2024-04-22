@@ -87,6 +87,7 @@ const Profile = () => {
   const saveImageUrl = (imageUrl) => {
     axios
       .post("http://localhost:8081/saveImageUrl", { imageUrl })
+
       .then((response) => {
         console.log("Image URL saved to database", response);
       })
