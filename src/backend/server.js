@@ -79,6 +79,30 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
   });
 });
 
+app.post("/posts", (req, res) => {
+  const { text, username } = req.body; // Assuming the username is sent along with the request body
+  const sql = "INSERT INTO posts (text, username) VALUES (?, ?)";
+  const values = [text, username];
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Error posting:", err);
+      return res.status(500).json({ error: "Error posting" });
+    }
+    return res.json({ message: "Post created successfully" });
+  });
+});
+app.delete("/posts/:id", (req, res) => {
+  const postId = req.params.id;
+  const sql = "DELETE FROM posts WHERE id = ?";
+  db.query(sql, postId, (err, result) => {
+    if (err) {
+      console.error("Error deleting post:", err);
+      return res.status(500).json({ error: "Error deleting post" });
+    }
+    return res.json({ message: "Post deleted successfully" });
+  });
+});
+
 app.listen(8081, () => {
   console.log("Server is running on port 8081");
 });

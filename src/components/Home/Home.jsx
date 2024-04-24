@@ -1,5 +1,10 @@
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
-import React, { useState } from "react";
+import { useState } from "react";
+import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
+import WifiIcon from "@mui/icons-material/Wifi";
+import BatteryFullIcon from "@mui/icons-material/BatteryFull";
+import axios from "axios";
+
 import {
   HomeParent,
   HomePost,
@@ -25,9 +30,6 @@ import {
   BookmarkIconStyle,
   CrudBtn,
 } from "./style";
-import SignalCellularAltIcon from "@mui/icons-material/SignalCellularAlt";
-import WifiIcon from "@mui/icons-material/Wifi";
-import BatteryFullIcon from "@mui/icons-material/BatteryFull";
 
 const Home = ({
   displayedText,
@@ -37,18 +39,14 @@ const Home = ({
 }) => {
   const [postText, setPostText] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(null);
-
   const [replies, setReplies] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
-
   const [currentPostIndex, setCurrentPostIndex] = useState(null);
   const [replyText, setReplyText] = useState({});
-  const [replyingToPost, setReplyingToPost] = useState(null); // New state for tracking reply state
-
+  const [replyingToPost, setReplyingToPost] = useState(null);
   const [username, setUsername] = useState(
     localStorage.getItem("username") || ""
   );
-
   const maxLength = 140;
 
   // Handle changes in the post text input
@@ -57,25 +55,57 @@ const Home = ({
       setPostText(e.target.value);
     }
   };
-  
 
   const toggleDropdown = (index) => {
-    // Toggle the dropdown for the clicked post index
     setIsDropdownOpen(isDropdownOpen === index ? null : index);
   };
 
   // Handle the posting of new posts
-  const handlePostButtonClick = () => {
+  // const handlePostButtonClick = () => {
+  //   if (currentPostIndex !== null) {
+  //     const updatedPosts = [...displayedText];
+  //     updatedPosts[currentPostIndex] = postText;
+  //     setDisplayedText(updatedPosts);
+  //     setCurrentPostIndex(null);
+  //   } else {
+  //     setDisplayedText([...displayedText, postText]);
+  //     setReplies([...replies, []]);
+  //   }
+  //   setPostText("");
+  // };
+  const handlePostButtonClick = async () => {
+    // Store the post text before clearing it
+    const currentPostText = postText;
+
     if (currentPostIndex !== null) {
+      const username = localStorage.getItem("username");
       const updatedPosts = [...displayedText];
-      updatedPosts[currentPostIndex] = postText;
+      updatedPosts[currentPostIndex] = currentPostText; // Use the stored text
       setDisplayedText(updatedPosts);
       setCurrentPostIndex(null);
     } else {
-      setDisplayedText([...displayedText, postText]);
-      setReplies([...replies, []]); // Initialize a new replies array for the new post
+      setDisplayedText([...displayedText, currentPostText]); // Use the stored text
+      setReplies([...replies, []]);
     }
     setPostText("");
+
+    try {
+      // Use the stored text when making the POST or PUT request
+      if (currentPostIndex === null) {
+        const username = localStorage.getItem("username");
+        await axios.post("http://localhost:8081/posts", {
+          text: currentPostText,
+          username: username, // Include the username in the request
+        });
+      } else {
+        await axios.put(`http://localhost:8081/posts/${currentPostIndex}`, {
+          text: currentPostText,
+          username: username, // Include the username in the request
+        });
+      }
+    } catch (error) {
+      console.error("Error while posting:", error);
+    }
   };
 
   // Handle liking of posts
@@ -88,8 +118,8 @@ const Home = ({
   // Handle bookmarking of posts
   const handleBookmarkClick = (index) => {
     const updatedBookmarkedPosts = [...bookmarkedPosts];
-    displayedText.map((text, id) => {
-      if (index == id) {
+    displayedText.forEach((text, id) => {
+      if (index === id) {
         if (updatedBookmarkedPosts[index]) {
           updatedBookmarkedPosts.splice(index, 1);
         } else {
@@ -97,7 +127,6 @@ const Home = ({
         }
       }
     });
-    // updatedBookmarkedPosts[index] = !updatedBookmarkedPosts[index];
     setBookmarkedPosts(updatedBookmarkedPosts);
   };
 
@@ -132,13 +161,28 @@ const Home = ({
   };
 
   // Handle deletion of posts
-  const handleDeleteClick = (index) => {
-    const updatedPosts = displayedText.filter((_, i) => i !== index);
-    setDisplayedText(updatedPosts);
-    setLikedPosts((prev) => prev.filter((_, i) => i !== index));
-    setBookmarkedPosts((prev) => prev.filter((_, i) => i !== index));
-    setReplies((prev) => prev.filter((_, i) => i !== index));
+  // const handleDeleteClick = (index) => {
+  //   const updatedPosts = displayedText.filter((_, i) => i !== index);
+  //   setDisplayedText(updatedPosts);
+  //   setLikedPosts((prev) => prev.filter((_, i) => i !== index));
+  //   setBookmarkedPosts((prev) => prev.filter((_, i) => i !== index));
+  //   setReplies((prev) => prev.filter((_, i) => i !== index));
+  // };
+  const handleDeleteClick = async (index) => {
+    // Send a request to your server to delete the post
+    try {
+      await axios.delete(`http://localhost:8081/posts/${index}`);
+      // If the deletion is successful, update the state to remove the post
+      const updatedPosts = displayedText.filter((_, i) => i !== index);
+      setDisplayedText(updatedPosts);
+      setLikedPosts((prev) => prev.filter((_, i) => i !== index));
+      setBookmarkedPosts((prev) => prev.filter((_, i) => i !== index));
+      setReplies((prev) => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
+
   const HomeStyle = {
     display: "flex",
     flexDirection: "row",
@@ -172,6 +216,15 @@ const Home = ({
     cursor: "pointer",
     marginTop: "20px",
     alignSelf: "center",
+  };
+
+  const replyBox = {
+    marginLeft: "70px",
+  };
+
+  const replyPstyle = {
+    borderTop: "1px solid #eae7e7",
+    padding: "10px",
   };
   return (
     <HomeParent>
@@ -250,24 +303,16 @@ const Home = ({
             <PostTextContainer>{text}</PostTextContainer>
 
             <IconContainer>
-              {/* <StyledIconButton>
-                <FavoriteIconStyle
-                  onClick={() => handleLikeClick(index)}
-                  style={{ color: likedPosts[index] ? "red" : "inherit" }}
-                />
-
-                <CommentIconStyle onClick={() => setReplyingToPost(index)} />
-              </StyledIconButton> */}
               <StyledIconButton>
                 <FavoriteIconStyle
                   onClick={() => handleLikeClick(index)}
                   style={{ color: likedPosts[index] ? "red" : "inherit" }}
                 />
                 <CommentIconStyle
-                  onClick={() => handleReplyIconClick(index)} // Change the onClick handler to handleReplyIconClick
+                  onClick={() => handleReplyIconClick(index)}
                   style={{
                     color: replyingToPost === index ? "blue" : "inherit",
-                  }} // Change the color based on whether the reply part is open
+                  }}
                 />
               </StyledIconButton>
               <BookmarkIconStyle
@@ -277,18 +322,18 @@ const Home = ({
             </IconContainer>
 
             {/* Display replies */}
-            <div>
+            <div style={replyBox}>
               {replies[index] &&
                 replies[index].map((reply, replyIndex) => (
                   <div key={replyIndex}>
-                    <p>{reply}</p>
+                    <p style={replyPstyle}>{reply}</p>
                   </div>
                 ))}
             </div>
 
             {/* Reply input */}
             {replyingToPost === index && (
-              <div>
+              <div style={replyBox}>
                 <Input
                   type="text"
                   value={replyText[index] || ""}
