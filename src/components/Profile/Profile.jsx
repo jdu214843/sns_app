@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+axios.defaults.baseURL = "http://localhost:8081";
+
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
 import LogOut from "./logout";
 
@@ -18,6 +20,7 @@ import {
   ProfileBox,
   ProfileImgIcon,
   ProfileDescription,
+  UpdateBtn,
 } from "./style";
 
 const displayStyle = {
@@ -142,6 +145,7 @@ const Profile = () => {
             </div>
           </ProfileDescription>
           <LogOut />
+          <UpdateBtn>Update Profile</UpdateBtn>
         </ProfileLogin>
       </ProfileLoginImg>
     </ProfileBox>

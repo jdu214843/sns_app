@@ -109,10 +109,39 @@ const Home = ({
   };
 
   // Handle liking of posts
+  // const handleLikeClick = (index) => {
+  //   const updatedLikedPosts = [...likedPosts];
+  //   updatedLikedPosts[index] = !updatedLikedPosts[index];
+  //   setLikedPosts(updatedLikedPosts);
+  // };
   const handleLikeClick = (index) => {
     const updatedLikedPosts = [...likedPosts];
     updatedLikedPosts[index] = !updatedLikedPosts[index];
     setLikedPosts(updatedLikedPosts);
+
+    // Show a notification
+    if (updatedLikedPosts[index]) {
+      showNotification("Liked!");
+    } else {
+      showNotification("Disliked!");
+    }
+  };
+
+  const showNotification = (message) => {
+    // Check if the browser supports notifications
+    if (!("Notification" in window)) {
+      alert("This browser does not support desktop notification");
+    } else if (Notification.permission === "granted") {
+      // If the permission is already granted, create a notification
+      new Notification(message);
+    } else if (Notification.permission !== "denied") {
+      // Otherwise, request permission from the user
+      Notification.requestPermission().then(function (permission) {
+        if (permission === "granted") {
+          new Notification(message);
+        }
+      });
+    }
   };
 
   // Handle bookmarking of posts
@@ -255,7 +284,7 @@ const Home = ({
           onChange={handleInputChange}
           placeholder="What is the post text?"
         />
-        <MaxLengthText $reached={Number(postText.length >= maxLength)}>
+        <MaxLengthText reached={Number(postText.length >= maxLength)}>
           {postText.length}/{maxLength}
         </MaxLengthText>
         <Button

@@ -22,7 +22,7 @@ const MaxLengthText = styled.span`
   color: ${(props) => (props.reached ? "red" : "gray")};
   position: absolute;
   left: 75px;
-  top: 34px;
+  top: 10px;
 `;
 
 const HomeIcons = styled.div`

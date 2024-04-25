@@ -93,6 +93,8 @@ const ProfileDescription = styled.div`
 `;
 
 const LogOutDiv = styled.div`
+  width: 70px;
+
   color: black;
   cursor: pointer;
   font-weight: 600;
@@ -101,7 +103,23 @@ const LogOutDiv = styled.div`
     color: red;
   }
 `;
+
+const UpdateBtn = styled.div`
+  width: 50%;
+  align-self: center;
+  border: none;
+  outline: none;
+  border-radius: 16px;
+  background-color: #24786d;
+  cursor: pointer;
+  color: #fff;
+  text-align: center;
+
+  font-style: capitalize;
+  padding: 10px;
+`;
 export {
+  UpdateBtn,
   ProfileDescription,
   LogDiv,
   ProfileBox,
