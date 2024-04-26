@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql");
 const cors = require("cors");
 const multer = require("multer");
+const path = require("path");
 
 const app = express();
 app.use(cors());
@@ -50,6 +51,17 @@ app.post("/signin", (req, res) => {
   });
 });
 
+// Save image URL
+app.post("/saveImageUrl", (req, res) => {
+  const imageUrl = req.body.imageUrl;
+
+  // Save the imageUrl to your database here
+  // This is a placeholder and will depend on how your database is set up
+  // db.save(imageUrl);
+
+  res.status(200).send({ message: "Image URL saved successfully" });
+});
+
 // Upload image
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -79,6 +91,26 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
   });
 });
 
+// Endpoint to serve images
+app.get("/uploads/:id", (req, res) => {
+  const imageId = req.params.id;
+
+  db.query("SELECT * FROM imgs WHERE id = ?", [imageId], (err, result) => {
+    if (err) {
+      console.error("Error fetching image:", err);
+      return res.status(500).json({ error: "Error fetching image" });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Image not found" });
+    }
+
+    const imagePath = result[0].image_url;
+
+    res.sendFile(path.join(__dirname, imagePath));
+  });
+});
+
+// posts
 app.post("/posts", (req, res) => {
   const { text, username } = req.body; // Assuming the username is sent along with the request body
   const sql = "INSERT INTO posts (text, username) VALUES (?, ?)";
@@ -91,6 +123,7 @@ app.post("/posts", (req, res) => {
     return res.json({ message: "Post created successfully" });
   });
 });
+// posts
 app.delete("/posts/:id", (req, res) => {
   const postId = req.params.id;
   const sql = "DELETE FROM posts WHERE id = ?";
@@ -100,6 +133,28 @@ app.delete("/posts/:id", (req, res) => {
       return res.status(500).json({ error: "Error deleting post" });
     }
     return res.json({ message: "Post deleted successfully" });
+  });
+});
+
+// Profile endpoint
+app.get("/profile", (req, res) => {
+  const userId = req.query.userId; // Assuming userId is passed as a query parameter
+  const sql = "SELECT * FROM login WHERE id = ?";
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error("Error fetching user profile:", err);
+      return res.status(500).json({ error: "Error fetching user profile" });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userProfile = {
+      id: result[0].id,
+      fullname: result[0].fullname,
+      username: result[0].username,
+      email: result[0].email,
+    };
+    res.status(200).json(userProfile);
   });
 });
 

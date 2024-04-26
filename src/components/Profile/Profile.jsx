@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-axios.defaults.baseURL = "http://localhost:8081";
 
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
 import LogOut from "./logout";
@@ -23,19 +22,8 @@ import {
   UpdateBtn,
 } from "./style";
 
-const displayStyle = {
-  color: "#797C7B",
-  fontSize: "14px",
-  fontFamily: "Poppins",
-};
-const displayDesStyle = {
-  fontSize: "18px",
-  fontFamily: "Poppins",
-  fontWeight: "bold",
-  paddingBottom: "15px",
-};
-
 const Profile = () => {
+  const [imageUrl, setImageUrl] = useState("");
   const [file, setFile] = useState(null);
   const [email, setEmail] = useState(localStorage.getItem("email") || "");
   const [fullname, setFullname] = useState(
@@ -44,16 +32,30 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const getUserId = () => {
+    return localStorage.getItem("userId");
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/profile", {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
+        const userId = getUserId();
+        if (!userId) {
+          // If userId is empty, return early
+          setLoading(false);
+          return;
+        }
+        const response = await axios.get(
+          `http://localhost:8081/profile?userId=${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
         setEmail(response.data.email);
         setFullname(response.data.fullname);
+        setImageUrl(response.data.imageUrl);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -69,6 +71,11 @@ const Profile = () => {
     setFile(event.target.files[0]);
   };
 
+  const handleUpdateProfile = (event) => {
+    alert("Profile updated");
+    // Implement update profile logic if needed
+  };
+
   const handleUpload = () => {
     const formData = new FormData();
     formData.append("image", file);
@@ -79,8 +86,9 @@ const Profile = () => {
       })
       .then((response) => {
         console.log("Image uploaded successfully", response);
-        const imageUrl = response.data.imageUrl;
-        saveImageUrl(imageUrl); // Faylning URL manzilini ma'lumotlar bazasiga saqlash
+        const uploadedImageUrl = response.data.imageUrl;
+        setImageUrl(uploadedImageUrl); // Update image URL in the UI
+        saveImageUrl(uploadedImageUrl); // Save image URL to the database if needed
       })
       .catch((error) => {
         console.error("Error uploading image:", error);
@@ -90,7 +98,6 @@ const Profile = () => {
   const saveImageUrl = (imageUrl) => {
     axios
       .post("http://localhost:8081/saveImageUrl", { imageUrl })
-
       .then((response) => {
         console.log("Image URL saved to database", response);
       })
@@ -100,6 +107,18 @@ const Profile = () => {
   };
 
   if (loading) return <div>Loading...</div>;
+
+  const displayStyle = {
+    color: "#797C7B",
+    fontSize: "14px",
+    fontFamily: "Poppins",
+  };
+  const displayDesStyle = {
+    fontSize: "18px",
+    fontFamily: "Poppins",
+    fontWeight: "bold",
+    paddingBottom: "15px",
+  };
 
   return (
     <ProfileBox>
@@ -132,6 +151,7 @@ const Profile = () => {
           >
             Add Img
           </button>
+          <div>{imageUrl && <img src={imageUrl} alt="Profile" />}</div>
         </ProfileImgIcon>
         <ProfileLogin>
           <ProfileDescription>
@@ -145,7 +165,7 @@ const Profile = () => {
             </div>
           </ProfileDescription>
           <LogOut />
-          <UpdateBtn>Update Profile</UpdateBtn>
+          <UpdateBtn onClick={handleUpdateProfile}>Update Profile</UpdateBtn>
         </ProfileLogin>
       </ProfileLoginImg>
     </ProfileBox>
