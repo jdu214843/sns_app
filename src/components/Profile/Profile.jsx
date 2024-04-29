@@ -6,15 +6,9 @@ import { StyledIcon } from "../Style/StyledBottomNavigationAction";
 import LogOut from "./logout";
 
 import {
-  ProfileClocks,
-  ProfileIcon,
-  ProfileParentTitle,
   ProfileTitle,
   ProfileArrow,
   ProfileH3,
-  ProfileSignal2,
-  ProfileFull2,
-  ProfileWife2,
   ProfileLogin,
   ProfileLoginImg,
   ProfileBox,
@@ -141,8 +135,8 @@ const Profile = () => {
     height: "50px",
   };
 
-  const profilInfoParent = {
-    display: "flex",
+  const EditInput = {
+    width: "50%",
   };
 
   const handleFullnameEdit = () => {
@@ -155,22 +149,6 @@ const Profile = () => {
 
   return (
     <ProfileBox>
-      <ProfileParentTitle>
-        <ProfileClocks>
-          <StyledIcon>9:41</StyledIcon>
-        </ProfileClocks>
-        <ProfileIcon>
-          <StyledIcon>
-            <ProfileSignal2 />
-          </StyledIcon>
-          <StyledIcon>
-            <ProfileWife2 />
-          </StyledIcon>
-          <StyledIcon>
-            <ProfileFull2 />
-          </StyledIcon>
-        </ProfileIcon>
-      </ProfileParentTitle>
       <ProfileTitle>
         <ProfileArrow />
         <ProfileH3>Profile</ProfileH3>
@@ -196,6 +174,7 @@ const Profile = () => {
               <h4 style={displayStyle}>Display Name</h4>
               {isEditingFullname ? (
                 <input
+                  style={EditInput}
                   type="text"
                   value={newFullname}
                   onChange={(e) => setNewFullname(e.target.value)}
@@ -205,7 +184,11 @@ const Profile = () => {
                   <h2 style={displayDesStyle}>
                     {fullname}
                     <EditIcon onClick={handleFullnameEdit}>
-                      <Edit />
+                      <Edit
+                        style={{ marginLeft: "5px", cursor: "pointer" }}
+                        onMouseEnter={(e) => (e.target.style.color = "blue")}
+                        onMouseLeave={(e) => (e.target.style.color = "#24786d")}
+                      />
                     </EditIcon>
                   </h2>
                 </>
@@ -215,6 +198,7 @@ const Profile = () => {
               <h4 style={displayStyle}>Email Address</h4>
               {isEditingEmail ? (
                 <input
+                  style={EditInput}
                   type="text"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
@@ -224,7 +208,11 @@ const Profile = () => {
                   <h2 style={displayDesStyle}>
                     {email}
                     <EditIcon onClick={handleEmailEdit}>
-                      <Edit />
+                      <Edit
+                        style={{ marginLeft: "5px", cursor: "pointer" }}
+                        onMouseEnter={(e) => (e.target.style.color = "blue")}
+                        onMouseLeave={(e) => (e.target.style.color = "#24786d")}
+                      />
                     </EditIcon>
                   </h2>
                 </>

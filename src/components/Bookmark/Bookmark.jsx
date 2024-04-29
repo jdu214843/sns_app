@@ -1,15 +1,9 @@
 import React, { useState } from "react";
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
 import {
-  BookmarkClocks,
-  BookmarkIcon,
-  BookmarkParentTitle,
   BookmarkTitle,
   BookmarkArrow,
   BookmarkH3,
-  BookmarkSignal2,
-  BookmarkFull2,
-  BookmarkWife2,
   MetBookmark,
   UserNiceParent,
   BookPost,
@@ -48,22 +42,6 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
   return (
     <div>
-      <BookmarkParentTitle>
-        <BookmarkClocks>
-          <StyledIcon>9:41</StyledIcon>
-        </BookmarkClocks>
-        <BookmarkIcon>
-          <StyledIcon>
-            <BookmarkSignal2 />
-          </StyledIcon>
-          <StyledIcon>
-            <BookmarkWife2 />
-          </StyledIcon>
-          <StyledIcon>
-            <BookmarkFull2 />
-          </StyledIcon>
-        </BookmarkIcon>
-      </BookmarkParentTitle>
       <BookmarkTitle>
         <BookmarkArrow />
         <BookmarkH3>Bookmarks</BookmarkH3>

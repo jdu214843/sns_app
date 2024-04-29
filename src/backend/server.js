@@ -117,6 +117,30 @@ app.put("/profile/:id/update", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+// update username
+// Update username
+app.put("/profile/:id/updateUsername", (req, res) => {
+  const id = req.params.id; // Get user ID from URL parameter
+  const { username } = req.body; // Get the new username from the request body
+
+  try {
+    // Update the username in the MySQL database
+    const query = "UPDATE login SET username = ? WHERE id = ?";
+    const values = [username, id];
+    db.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error updating username:", err);
+        res.status(500).json({ error: "Internal server error" });
+        return;
+      }
+      console.log("Username updated successfully");
+      res.status(200).json({ message: "Username updated successfully" });
+    });
+  } catch (error) {
+    console.error("Error updating username:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 // Endpoint to serve images
 app.get("/uploads/:id", (req, res) => {

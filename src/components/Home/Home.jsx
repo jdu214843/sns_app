@@ -8,9 +8,6 @@ import axios from "axios";
 import {
   HomeParent,
   HomePost,
-  HomeParentTitle,
-  HomeClocks,
-  HomeIcons,
   Input,
   Button,
   MaxLengthText,
@@ -212,12 +209,6 @@ const Home = ({
     }
   };
 
-  const HomeStyle = {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    paddingTop: "10px",
-  };
   const InputStyle = {
     width: "100%",
     marginLeft: "70px",
@@ -257,23 +248,6 @@ const Home = ({
   };
   return (
     <HomeParent>
-      <HomeParentTitle style={HomeStyle}>
-        <HomeClocks>
-          <StyledIcon>9:41</StyledIcon>
-        </HomeClocks>
-        <HomeIcons>
-          <StyledIcon>
-            <SignalCellularAltIcon />
-          </StyledIcon>
-          <StyledIcon>
-            <WifiIcon />
-          </StyledIcon>
-          <StyledIcon>
-            <BatteryFullIcon />
-          </StyledIcon>
-        </HomeIcons>
-      </HomeParentTitle>
-
       <HomePost>
         <UserIcon />
         <Input
