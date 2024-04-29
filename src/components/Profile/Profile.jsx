@@ -31,11 +31,11 @@ const Profile = () => {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // show image saved from localStorage
 
   const getUserId = () => {
     return localStorage.getItem("userId");
   };
-
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -53,6 +53,7 @@ const Profile = () => {
             },
           }
         );
+
         setEmail(response.data.email);
         setFullname(response.data.fullname);
         setImageUrl(response.data.imageUrl);
@@ -76,12 +77,18 @@ const Profile = () => {
     // Implement update profile logic if needed
   };
 
+  // save image upladed from user to localStorage
   const handleUpload = () => {
+    if (!file) {
+      alert("Please select an image to upload");
+      return;
+    }
+    // localStorage.setItem("image", file);
     const formData = new FormData();
     formData.append("image", file);
 
     axios
-      .post("http://localhost:8081/uploadImage", formData, {
+      .post("http://localhost:8081/uploads", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then((response) => {
@@ -151,7 +158,14 @@ const Profile = () => {
           >
             Add Img
           </button>
-          <div>{imageUrl && <img src={imageUrl} alt="Profile" />}</div>
+          <div>
+            {imageUrl && (
+              <img
+                src={"/backend/uploads/asilbek.jpg" + imageUrl}
+                alt="Profile"
+              />
+            )}
+          </div>
         </ProfileImgIcon>
         <ProfileLogin>
           <ProfileDescription>

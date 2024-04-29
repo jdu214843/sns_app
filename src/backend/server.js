@@ -74,7 +74,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/uploadImage", upload.single("image"), (req, res) => {
+app.post("/uploads", upload.single("image"), (req, res) => {
   if (!req.file) {
     return res.status(400).send("No files were uploaded.");
   }
@@ -87,7 +87,9 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
       return res.status(500).json({ error: "Internal server error" });
     }
     console.log("Image URL saved to database");
-    return res.status(200).json({ message: "Image URL saved to database" });
+    return res.status(200).json({
+      message: "Image URL saved to database",
+    });
   });
 });
 
