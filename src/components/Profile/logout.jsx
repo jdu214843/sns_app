@@ -40,7 +40,16 @@ const LogOut = () => {
         <div className="log_out" onClick={handleLogout}>
           <LogOutDiv>Log Out</LogOutDiv>
 
-          <h5 style={{ color: "#797C7B", cursor: "pointer" }}>
+          <h5
+            style={{
+              color: "#797C7B",
+              cursor: "pointer",
+              width: "150px",
+              transition: "color 0.3s ease", // Transition added here
+            }}
+            onMouseEnter={(e) => (e.target.style.color = "red")} // Change color on hover
+            onMouseLeave={(e) => (e.target.style.color = "#797C7B")} // Reset color on hover out
+          >
             {username && `Logged in as: ${username}`}
           </h5>
         </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Edit } from "@mui/icons-material"; // Edit ikoni uchun
 
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
 import LogOut from "./logout";
@@ -20,6 +21,7 @@ import {
   ProfileImgIcon,
   ProfileDescription,
   UpdateBtn,
+  EditIcon, // Izoh: Edit ikoniga mos EditIcon komponentini import qilamiz
 } from "./style";
 
 const Profile = () => {
@@ -31,22 +33,26 @@ const Profile = () => {
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // show image saved from localStorage
+  const [isEditingFullname, setIsEditingFullname] = useState(false);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [newFullname, setNewFullname] = useState(fullname);
+  const [newEmail, setNewEmail] = useState(email);
 
   const getUserId = () => {
-    return localStorage.getItem("userId");
+    return localStorage.getItem("id");
   };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const userId = getUserId();
-        if (!userId) {
-          // If userId is empty, return early
+        const id = getUserId();
+
+        if (!id) {
           setLoading(false);
           return;
         }
         const response = await axios.get(
-          `http://localhost:8081/profile?userId=${userId}`,
+          `http://localhost:8081/profile?id=${id}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -56,7 +62,6 @@ const Profile = () => {
 
         setEmail(response.data.email);
         setFullname(response.data.fullname);
-        setImageUrl(response.data.imageUrl);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -72,44 +77,48 @@ const Profile = () => {
     setFile(event.target.files[0]);
   };
 
-  const handleUpdateProfile = (event) => {
-    alert("Profile updated");
-    // Implement update profile logic if needed
-  };
-
-  // save image upladed from user to localStorage
   const handleUpload = () => {
     if (!file) {
       alert("Please select an image to upload");
       return;
     }
-    // localStorage.setItem("image", file);
-    const formData = new FormData();
-    formData.append("image", file);
 
-    axios
-      .post("http://localhost:8081/uploads", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((response) => {
-        console.log("Image uploaded successfully", response);
-        const uploadedImageUrl = response.data.imageUrl;
-        setImageUrl(uploadedImageUrl); // Update image URL in the UI
-        saveImageUrl(uploadedImageUrl); // Save image URL to the database if needed
-      })
-      .catch((error) => {
-        console.error("Error uploading image:", error);
-      });
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataURL = reader.result;
+      setImageUrl(dataURL); // Update image URL in the UI
+      localStorage.setItem("imageUrl", dataURL); // Save image URL to local storage
+    };
+    reader.readAsDataURL(file);
   };
 
-  const saveImageUrl = (imageUrl) => {
+  const handleUpdateProfile = () => {
+    const id = getUserId(); // Get user ID
+    const data = {
+      email: newEmail,
+      fullname: newFullname,
+    };
+
     axios
-      .post("http://localhost:8081/saveImageUrl", { imageUrl })
+      .put(`http://localhost:8081/profile/${id}/update`, data, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
       .then((response) => {
-        console.log("Image URL saved to database", response);
+        console.log("Profile updated successfully:", response.data);
+        // Update state and UI after successful update
+        setFullname(newFullname);
+        setEmail(newEmail);
+        setIsEditingFullname(false);
+        setIsEditingEmail(false);
+        // Update local storage with new email and fullname
+        localStorage.setItem("email", newEmail);
+        localStorage.setItem("fullname", newFullname);
       })
       .catch((error) => {
-        console.error("Error saving image URL:", error);
+        console.error("Error updating profile:", error);
+        // Handle error if necessary
       });
   };
 
@@ -125,6 +134,23 @@ const Profile = () => {
     fontFamily: "Poppins",
     fontWeight: "bold",
     paddingBottom: "15px",
+    display: "flex",
+  };
+  const ImageStyle = {
+    width: "50px",
+    height: "50px",
+  };
+
+  const profilInfoParent = {
+    display: "flex",
+  };
+
+  const handleFullnameEdit = () => {
+    setIsEditingFullname(true);
+  };
+
+  const handleEmailEdit = () => {
+    setIsEditingEmail(true);
   };
 
   return (
@@ -157,25 +183,52 @@ const Profile = () => {
             onClick={handleUpload}
           >
             Add Img
-          </button>
+          </button>{" "}
           <div>
             {imageUrl && (
-              <img
-                src={"/backend/uploads/asilbek.jpg" + imageUrl}
-                alt="Profile"
-              />
+              <img style={ImageStyle} src={imageUrl} alt="Profile" />
             )}
           </div>
         </ProfileImgIcon>
         <ProfileLogin>
           <ProfileDescription>
-            <div className="display_name">
+            <div>
               <h4 style={displayStyle}>Display Name</h4>
-              <h2 style={displayDesStyle}>{fullname}</h2>
+              {isEditingFullname ? (
+                <input
+                  type="text"
+                  value={newFullname}
+                  onChange={(e) => setNewFullname(e.target.value)}
+                />
+              ) : (
+                <>
+                  <h2 style={displayDesStyle}>
+                    {fullname}
+                    <EditIcon onClick={handleFullnameEdit}>
+                      <Edit />
+                    </EditIcon>
+                  </h2>
+                </>
+              )}
             </div>
-            <div className="display_email">
+            <div>
               <h4 style={displayStyle}>Email Address</h4>
-              <h2 style={displayDesStyle}>{email}</h2>
+              {isEditingEmail ? (
+                <input
+                  type="text"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+              ) : (
+                <>
+                  <h2 style={displayDesStyle}>
+                    {email}
+                    <EditIcon onClick={handleEmailEdit}>
+                      <Edit />
+                    </EditIcon>
+                  </h2>
+                </>
+              )}
             </div>
           </ProfileDescription>
           <LogOut />

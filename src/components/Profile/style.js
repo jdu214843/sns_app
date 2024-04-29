@@ -118,7 +118,12 @@ const UpdateBtn = styled.div`
   font-style: capitalize;
   padding: 10px;
 `;
+
+const EditIcon = styled.div`
+  margin-left: 5px;
+`;
 export {
+  EditIcon,
   UpdateBtn,
   ProfileDescription,
   LogDiv,

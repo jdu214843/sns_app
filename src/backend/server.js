@@ -93,6 +93,31 @@ app.post("/uploads", upload.single("image"), (req, res) => {
   });
 });
 
+// update profile data
+app.put("/profile/:id/update", async (req, res) => {
+  const id = req.params.id; // Get user ID from URL parameter
+  const { email, fullname } = req.body; // Get email and fullname from request body
+
+  try {
+    // Update user profile data in MySQL database
+    const query = "UPDATE login SET email = ?, fullname = ? WHERE id = ?";
+    const values = [email, fullname, id];
+    // connection.query o'rniga db.query ishlatilishi kerak
+    db.query(query, values, (err, result) => {
+      if (err) {
+        console.error("Error updating profile:", err);
+        res.status(500).json({ error: "Internal server error" });
+        return;
+      }
+      console.log("Profile updated successfully");
+      res.status(200).json({ message: "Profile updated successfully" });
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Endpoint to serve images
 app.get("/uploads/:id", (req, res) => {
   const imageId = req.params.id;
@@ -140,9 +165,9 @@ app.delete("/posts/:id", (req, res) => {
 
 // Profile endpoint
 app.get("/profile", (req, res) => {
-  const userId = req.query.userId; // Assuming userId is passed as a query parameter
+  const id = req.query.id; // Assuming userId is passed as a query parameter
   const sql = "SELECT * FROM login WHERE id = ?";
-  db.query(sql, [userId], (err, result) => {
+  db.query(sql, [id], (err, result) => {
     if (err) {
       console.error("Error fetching user profile:", err);
       return res.status(500).json({ error: "Error fetching user profile" });

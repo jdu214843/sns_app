@@ -34,10 +34,11 @@ const SignIn = ({ onSignIn }) => {
         const res = await axios.post("http://localhost:8081/signin", values);
 
         if (res.status === 200 && res.data.status === "success") {
-          const { email, fullname, username } = res.data.user;
+          const { email, fullname, username, id } = res.data.user;
           localStorage.setItem("email", email);
           localStorage.setItem("username", username);
           localStorage.setItem("fullname", fullname);
+          localStorage.setItem("id", id);
 
           // console.log(0);
           navigate("/home");
