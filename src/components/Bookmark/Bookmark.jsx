@@ -39,7 +39,9 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
     alignSelf: "center",
   };
-
+  const bookmarkStyle = {
+    overflowY: "scroll",
+  };
   return (
     <div>
       <BookmarkTitle>
@@ -47,7 +49,7 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
         <BookmarkH3>Bookmarks</BookmarkH3>
       </BookmarkTitle>
 
-      <div>
+      <div style={bookmarkStyle}>
         {bookmarkedPosts.length > 0 ? (
           bookmarkedPosts.map((post, index) => (
             <div key={index}>

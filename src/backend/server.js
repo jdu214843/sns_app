@@ -152,7 +152,7 @@ app.put("/post", (req, res) => {
     }
 
     return res.status(200).json({
-      message: "Profile updated successfully",
+      message: "Edit updated successfully",
     });
   });
 });

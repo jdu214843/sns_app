@@ -7,6 +7,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 const HomeParent = styled.div`
   width: 100%;
   height: 100%;
+  overflow-y: scroll;
 `;
 const HomeParentTitle = styled.div``;
 const HomePost = styled.div`

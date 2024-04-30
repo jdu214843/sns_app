@@ -86,6 +86,7 @@ const NavigationBar = () => {
 const App = () => {
   const [displayedText, setDisplayedText] = useState([]);
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+
   return (
     <Router>
       <Container>
