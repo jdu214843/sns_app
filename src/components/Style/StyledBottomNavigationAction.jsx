@@ -7,7 +7,6 @@ const StyledBottomNavigationAction = styled(BottomNavigationAction)`
   && {
     color: white;
     background-color: #24786d;
-    /* background-color: red; */
     font-size: 16px;
     width: 100%;
     display: flex;

@@ -8,6 +8,8 @@ import {
   UserNiceParent,
   BookPost,
   DeleteIcon1,
+  BookmarkParentChild,
+  BookmarkParent,
 } from "./style";
 import {
   PostUserContainer,
@@ -39,17 +41,15 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
     alignSelf: "center",
   };
-  const bookmarkStyle = {
-    overflowY: "scroll",
-  };
+
   return (
-    <div>
+    <BookmarkParent>
       <BookmarkTitle>
         <BookmarkArrow />
         <BookmarkH3>Bookmarks</BookmarkH3>
       </BookmarkTitle>
 
-      <div style={bookmarkStyle}>
+      <BookmarkParentChild>
         {bookmarkedPosts.length > 0 ? (
           bookmarkedPosts.map((post, index) => (
             <div key={index}>
@@ -76,8 +76,8 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
         ) : (
           <p>No bookmarks yet.</p>
         )}
-      </div>
-    </div>
+      </BookmarkParentChild>
+    </BookmarkParent>
   );
 };
 

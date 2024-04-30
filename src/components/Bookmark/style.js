@@ -14,9 +14,13 @@ const BookmarkParentTitle = styled.div`
   flex-direction: row;
   justify-content: space-around;
   padding-top: 10px;
-  /* background-color: red; */
 `;
-
+const BookmarkParent = styled.div`
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+`;
+const BookmarkParentChild = styled.div``;
 const BookmarkClocks = styled.div``;
 const BookmarkTitle = styled.div`
   padding-top: 20px;
@@ -75,4 +79,6 @@ export {
   BookmarkSignal2,
   BookmarkWife2,
   BookmarkFull2,
+  BookmarkParent,
+  BookmarkParentChild,
 };
