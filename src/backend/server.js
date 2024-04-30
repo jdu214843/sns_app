@@ -7,62 +7,15 @@ const path = require("path");
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "asilbek",
-  database: "signup",
+  database: "sns",
 });
 
-// Sign up
-app.post("/signup", (req, res) => {
-  const { fullname, username, email, password } = req.body;
-  const sql =
-    "INSERT INTO login (`fullname`, `username`, `email`, `password`) VALUES (?, ?, ?, ?)";
-  const values = [fullname, username, email, password];
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error("Error signing up:", err);
-      return res.status(500).json({ error: "Error signing up" });
-    }
-    return res.json({ message: "Signed up successfully" });
-  });
-});
-
-// Sign in
-app.post("/signin", (req, res) => {
-  const { email, password } = req.body;
-  const sql = "SELECT * FROM login WHERE `email` = ? AND `password` = ?";
-  db.query(sql, [email, password], (err, data) => {
-    if (err) {
-      console.error("Error signing in:", err);
-      return res.status(500).json({ error: "Error signing in" });
-    }
-    if (data.length > 0) {
-      const { id, username, fullname, email } = data[0];
-      return res.json({
-        status: "success",
-        user: { id, username, fullname, email },
-      });
-    } else {
-      return res.status(404).json({ error: "User not found" });
-    }
-  });
-});
-
-// Save image URL
-app.post("/saveImageUrl", (req, res) => {
-  const imageUrl = req.body.imageUrl;
-
-  // Save the imageUrl to your database here
-  // This is a placeholder and will depend on how your database is set up
-  // db.save(imageUrl);
-
-  res.status(200).send({ message: "Image URL saved successfully" });
-});
-
-// Upload image
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -74,14 +27,60 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/uploads", upload.single("image"), (req, res) => {
+// Register
+app.post("/signup", (req, res) => {
+  const { full_name, username, email, password } = req.body;
+
+  const sql =
+    "INSERT INTO User (`full_name`, `username`, `email`, `password`) VALUES (?, ?, ?, ?)";
+  const values = [full_name, username, email, password];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Error signing up:", err);
+      return res.status(500).json({ error: "Error signing up" });
+    }
+    return res.json({ message: "Signed up successfully" });
+  });
+});
+
+// LogIn
+app.post("/signin", (req, res) => {
+  const { email, password } = req.body;
+  const sql = "SELECT * FROM User WHERE `email` = ? AND `password` = ?";
+  db.query(sql, [email, password], (err, data) => {
+    if (err) {
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
+    }
+    if (data.length > 0) {
+      const { id, username, full_name, email, image } = data[0];
+      return res.json({
+        status: "success",
+        user: {
+          id,
+          username,
+          full_name,
+          email,
+          image: image ? image : "default.png",
+        },
+      });
+    } else {
+      return res.status(404).json({ error: "User not found" });
+    }
+  });
+});
+
+// Upload Image
+app.post("/uploadImage", upload.single("image"), (req, res) => {
   if (!req.file) {
     return res.status(400).send("No files were uploaded.");
   }
-  const imageUrl = req.file.path;
+  const image = req.file.filename;
+  const { user_id } = req.body;
 
-  const sql = "INSERT INTO imgs (image_url) VALUES (?)";
-  db.query(sql, [imageUrl], (err, result) => {
+  const sql = "UPDATE User SET image = ? WHERE id = ?";
+  db.query(sql, [image, user_id], (err, result) => {
     if (err) {
       console.error("Error saving image URL to database:", err);
       return res.status(500).json({ error: "Internal server error" });
@@ -93,92 +92,46 @@ app.post("/uploads", upload.single("image"), (req, res) => {
   });
 });
 
-// update profile data
-app.put("/profile/:id/update", async (req, res) => {
-  const id = req.params.id; // Get user ID from URL parameter
-  const { email, fullname } = req.body; // Get email and fullname from request body
+// Update Profile
+app.put("/profile", (req, res) => {
+  const { user_id, full_name, username } = req.body;
 
-  try {
-    // Update user profile data in MySQL database
-    const query = "UPDATE login SET email = ?, fullname = ? WHERE id = ?";
-    const values = [email, fullname, id];
-    // connection.query o'rniga db.query ishlatilishi kerak
-    db.query(query, values, (err, result) => {
-      if (err) {
-        console.error("Error updating profile:", err);
-        res.status(500).json({ error: "Internal server error" });
-        return;
-      }
-      console.log("Profile updated successfully");
-      res.status(200).json({ message: "Profile updated successfully" });
-    });
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-// update username
-// Update username
-app.put("/profile/:id/updateUsername", (req, res) => {
-  const id = req.params.id; // Get user ID from URL parameter
-  const { username } = req.body; // Get the new username from the request body
-
-  try {
-    // Update the username in the MySQL database
-    const query = "UPDATE login SET username = ? WHERE id = ?";
-    const values = [username, id];
-    db.query(query, values, (err, result) => {
-      if (err) {
-        console.error("Error updating username:", err);
-        res.status(500).json({ error: "Internal server error" });
-        return;
-      }
-      console.log("Username updated successfully");
-      res.status(200).json({ message: "Username updated successfully" });
-    });
-  } catch (error) {
-    console.error("Error updating username:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// Endpoint to serve images
-app.get("/uploads/:id", (req, res) => {
-  const imageId = req.params.id;
-
-  db.query("SELECT * FROM imgs WHERE id = ?", [imageId], (err, result) => {
+  const sql = "UPDATE User SET full_name = ?,username = ? WHERE id = ?";
+  db.query(sql, [full_name, username, user_id], (err, result) => {
     if (err) {
-      console.error("Error fetching image:", err);
-      return res.status(500).json({ error: "Error fetching image" });
-    }
-    if (result.length === 0) {
-      return res.status(404).json({ error: "Image not found" });
+      console.error("Error updating profile:", err);
+      return res.status(500).json({ error: "Internal server error" });
     }
 
-    const imagePath = result[0].image_url;
-
-    res.sendFile(path.join(__dirname, imagePath));
+    return res.status(200).json({
+      message: "Profile updated successfully",
+    });
   });
 });
 
-// posts
-app.post("/posts", (req, res) => {
-  const { text, username } = req.body; // Assuming the username is sent along with the request body
-  const sql = "INSERT INTO posts (text, username) VALUES (?, ?)";
-  const values = [text, username];
+// Create Post
+app.post("/post", (req, res) => {
+  const { text, user_id } = req.body; // Assuming the username is sent along with the request body
+  const sql = "INSERT INTO Post (text, user_id) VALUES (?, ?)";
+  const values = [text, user_id];
   db.query(sql, values, (err, result) => {
     if (err) {
       console.error("Error posting:", err);
       return res.status(500).json({ error: "Error posting" });
     }
-    return res.json({ message: "Post created successfully" });
+    console.log(result);
+    return res.json({
+      message: "Post created successfully",
+      post_id: result.insertId,
+    });
   });
 });
-// posts
-app.delete("/posts/:id", (req, res) => {
-  const postId = req.params.id;
-  const sql = "DELETE FROM posts WHERE id = ?";
-  db.query(sql, postId, (err, result) => {
+
+// Delete Post
+app.delete("/post", (req, res) => {
+  const { post_id, user_id } = req.body;
+  const sql = "DELETE FROM Post WHERE id = ? and user_id = ?";
+  db.query(sql, [post_id, user_id], (err, result) => {
     if (err) {
       console.error("Error deleting post:", err);
       return res.status(500).json({ error: "Error deleting post" });
@@ -187,25 +140,230 @@ app.delete("/posts/:id", (req, res) => {
   });
 });
 
-// Profile endpoint
-app.get("/profile", (req, res) => {
-  const id = req.query.id; // Assuming userId is passed as a query parameter
-  const sql = "SELECT * FROM login WHERE id = ?";
-  db.query(sql, [id], (err, result) => {
+// Update Post
+app.put("/post", (req, res) => {
+  const { user_id, post_id, text } = req.body;
+
+  const sql = "UPDATE Post SET text = ? WHERE id = ? AND user_id = ?";
+  db.query(sql, [text, post_id, user_id], (err, result) => {
     if (err) {
-      console.error("Error fetching user profile:", err);
-      return res.status(500).json({ error: "Error fetching user profile" });
+      console.error("Error updating profile:", err);
+      return res.status(500).json({ error: "Internal server error" });
     }
-    if (result.length === 0) {
-      return res.status(404).json({ error: "User not found" });
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+    });
+  });
+});
+
+// Get Post
+app.post("/posts", (req, res) => {
+  const { user_id } = req.body;
+  const sql =
+    "SELECT p.id,p.text,u.full_name,u.username,COALESCE(u.image, 'default.png') AS image,b.status FROM Post AS p INNER JOIN User AS u ON u.id = p.user_id LEFT JOIN Bookmark AS b ON b.post_id = p.id AND b.user_id = ? ORDER by p.id DESC";
+  db.query(sql, [user_id], (err, result) => {
+    if (err) {
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
     }
-    const userProfile = {
-      id: result[0].id,
-      fullname: result[0].fullname,
-      username: result[0].username,
-      email: result[0].email,
-    };
-    res.status(200).json(userProfile);
+    if (result.length > 0) {
+      return res.json({
+        status: "success",
+        posts: result,
+      });
+    } else {
+      return res.status(200).json({ error: "Post not found" });
+    }
+  });
+});
+
+// Create Comment
+app.post("/comment", (req, res) => {
+  const { text, post_id, user_id } = req.body;
+  const sql = "INSERT INTO Comment (text, user_id, post_id) VALUES (?, ?, ?)";
+  const values = [text, user_id, post_id];
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Error posting:", err);
+      return res.status(500).json({ error: "Error commenting" });
+    }
+    return res.json({
+      message: "Comment created successfully",
+      comment_id: result.insertId,
+    });
+  });
+});
+
+// Delete Comment
+app.delete("/comment", (req, res) => {
+  const { comment_id, user_id } = req.body;
+  const sql = "DELETE FROM Comment WHERE id = ? and user_id = ?";
+  db.query(sql, [comment_id, user_id], (err, result) => {
+    if (err) {
+      console.error("Error deleting post:", err);
+      return res.status(500).json({ error: "Error deleting comment" });
+    }
+    return res.json({ message: "Comment deleted successfully" });
+  });
+});
+
+// Update Comment
+app.put("/comment", (req, res) => {
+  const { user_id, comment_id, text } = req.body;
+
+  const sql = "UPDATE Comment SET text = ? WHERE id = ? AND user_id = ?";
+  db.query(sql, [text, comment_id, user_id], (err, result) => {
+    if (err) {
+      console.error("Error updating profile:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+
+    return res.status(200).json({
+      message: "Comment updated successfully",
+    });
+  });
+});
+
+// Get Comment
+app.get("/comment/:post_id", (req, res) => {
+  const sql =
+    "SELECT c.id,c.text,u.full_name,u.username,COALESCE(u.image, 'default.png') AS image FROM Comment AS c INNER JOIN User AS u ON u.id = c.user_id WHERE c.post_id = ?";
+  db.query(sql, req.params.post_id, (err, result) => {
+    if (err) {
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
+    }
+    if (result.length > 0) {
+      return res.json({
+        status: "success",
+        comments: result,
+      });
+    } else {
+      return res.status(200).json({ error: "Comment not found" });
+    }
+  });
+});
+
+// Set Like
+app.post("/like", (req, res) => {
+  const { user_id, post_id, action } = req.body;
+  const sql = "SELECT * FROM `Like` WHERE `post_id` = ? AND `user_id` = ?";
+  const actionStatus = action == "true" ? true : false;
+  db.query(sql, [post_id, user_id], (err, data) => {
+    if (err) {
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
+    }
+    if (data.length > 0) {
+      const sql =
+        "UPDATE `Like` SET status = ? WHERE post_id = ? AND user_id = ?";
+      db.query(sql, [actionStatus, post_id, user_id], (err, data) => {
+        if (err) {
+          console.error("Error Like:", err);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+        return res.status(200).json({
+          message: "Liked successfully",
+        });
+      });
+    } else {
+      const sql =
+        "INSERT INTO `Like` (user_id, post_id,status) VALUES (?, ?, ?)";
+      db.query(sql, [user_id, post_id, actionStatus], (err, data) => {
+        if (err) {
+          console.error("Error Like:", err);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+        return res.status(200).json({
+          message: "Liked successfully",
+        });
+      });
+    }
+  });
+});
+
+// Set Bookmark
+app.post("/bookmark", (req, res) => {
+  const { user_id, post_id, action } = req.body;
+  const sql = "SELECT * FROM `Bookmark` WHERE `post_id` = ? AND `user_id` = ?";
+  const actionStatus = action == "true" ? true : false;
+  db.query(sql, [post_id, user_id], (err, data) => {
+    if (err) {
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
+    }
+    if (data.length > 0) {
+      const sql =
+        "UPDATE `Bookmark` SET status = ? WHERE post_id = ? AND user_id = ?";
+      db.query(sql, [actionStatus, post_id, user_id], (err, data) => {
+        if (err) {
+          console.error("Error Like:", err);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+        return res.status(200).json({
+          message: "Bookmark successfully",
+        });
+      });
+    } else {
+      const sql =
+        "INSERT INTO `Bookmark` (user_id, post_id,status) VALUES (?, ?, ?)";
+      db.query(sql, [user_id, post_id, actionStatus], (err, data) => {
+        if (err) {
+          console.error("Error Like:", err);
+          return res.status(500).json({ error: "Internal server error" });
+        }
+        return res.status(200).json({
+          message: "Bookmark successfully",
+        });
+      });
+    }
+  });
+});
+
+// Get Bookmark List
+app.post("/myBookmark", (req, res) => {
+  const { user_id } = req.body;
+  const sql = `SELECT p.id,p.text,u.full_name,u.username,COALESCE(u.image, 'default.png') AS image 
+                        FROM Bookmark AS b
+                        INNER JOIN Post AS p ON b.post_id = p.id
+                        INNER JOIN User AS u ON u.id = p.user_id
+                        WHERE b.user_id = ?`;
+  db.query(sql, [user_id], (err, result) => {
+    if (err) {
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
+    }
+    if (result.length > 0) {
+      return res.json({
+        status: "success",
+        posts: result,
+      });
+    } else {
+      return res.status(200).json({ error: "Bookmarks not found" });
+    }
+  });
+});
+
+// My Messages
+app.post("/myPost", (req, res) => {
+  const { user_id } = req.body;
+  const sql = `SELECT p.id,p.text,u.full_name,u.username,COALESCE(u.image, 'default.png') AS image,b.status FROM Post AS p
+            INNER JOIN User AS u ON u.id = p.user_id LEFT JOIN Bookmark AS b ON b.post_id = p.id
+            WHERE p.user_id = ?`;
+  db.query(sql, [user_id], (err, result) => {
+    if (err) {
+      console.error("Error signing in:", err);
+      return res.status(500).json({ error: "Error signing in" });
+    }
+    if (result.length > 0) {
+      return res.json({
+        status: "success",
+        posts: result,
+      });
+    } else {
+      return res.status(200).json({ error: "Bookmarks not found" });
+    }
   });
 });
 

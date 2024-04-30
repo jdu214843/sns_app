@@ -8,7 +8,7 @@ const SignUp = () => {
   const [errors, setErrors] = useState({});
 
   const [values, setValues] = useState({
-    fullname: "",
+    full_name: "",
     username: "",
     email: "",
     password: "",
@@ -33,23 +33,20 @@ const SignUp = () => {
     event.preventDefault();
     if (handleValidation()) {
       try {
-        const res = await axios.post("http://localhost:8081/signup", values);
-        localStorage.setItem("password", values.password);
-        localStorage.setItem("fullname", values.fullname);
-        localStorage.setItem("username", values.username);
-
+        const res = await axios.post("http://localhost:8081/signup", {
+          full_name: values.full_name,
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        });
+        console.log(res.data); // Optional: Log response data
+        // Redirect or perform any necessary actions upon successful signup
         navigate("/");
       } catch (err) {
-        if (err.response) {
-          console.error(`Error: ${err.response.status}`);
-          alert("Server error: " + err.response.data);
-        } else if (err.request) {
-          console.error("Network error: No response received.");
-          alert("Unable to connect to server. Please try again later.");
-        } else {
-          console.error("An unexpected error occurred: " + err.message);
-          alert("An unexpected error occurred: " + err.message);
-        }
+        console.error("Error signing up:", err);
+        // Handle errors, display appropriate messages to the user
+        // You can access error response data using err.response.data
+        alert("Error signing up. Please try again.");
       }
     }
   };
@@ -58,7 +55,7 @@ const SignUp = () => {
     <div className="SignUpSection">
       <div>
         <div className="SignUpTitle">
-          <p className="titleSignUp">Log in to Chatbox</p>
+          <p className="titleSignUp">Sign Up for Chatbox</p>
           <p className="welcome">
             Get chatting with friends and family <br /> today by signing up for
             our chat app!
@@ -66,15 +63,15 @@ const SignUp = () => {
         </div>
         <form onSubmit={handleSubmit}>
           <div className="inputBox">
-            <label htmlFor="fullname">Full Name</label>
+            <label htmlFor="full_name">Full Name</label>
             <input
               type="text"
-              placeholder="Enter fullname"
+              placeholder="Enter full name"
               onChange={handleInput}
-              name="fullname"
-              value={values.fullname}
+              name="full_name"
+              value={values.full_name}
             />
-            {errors.fullname && <span>{errors.fullname}</span>}
+            {errors.full_name && <span>{errors.full_name}</span>}
           </div>
           <div className="inputBox1">
             <label htmlFor="username">Username</label>
