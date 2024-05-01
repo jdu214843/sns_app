@@ -134,17 +134,36 @@ const Home = ({
       if (response.status === 200) {
         const updatedBookmarkedPosts = [...bookmarkedPosts];
         if (action === "true") {
-          updatedBookmarkedPosts[index] = displayedText[index];
+          updatedBookmarkedPosts[index] = true;
         } else {
           delete updatedBookmarkedPosts[index];
         }
         setBookmarkedPosts(updatedBookmarkedPosts);
+        console.log(updatedBookmarkedPosts);
       }
     } catch (error) {
       console.error("Error bookmarking post:", error);
-      // Handle error if needed
     }
   };
+
+  useEffect(() => {
+    const fetchBookmarkedPosts = async () => {
+      try {
+        const user_id = getUserId();
+        const response = await axios.post("http://localhost:8081/myBookmark", {
+          user_id: user_id,
+        });
+
+        const bookmarkedPostsData = response.data.posts;
+
+        setBookmarkedPosts(bookmarkedPostsData);
+      } catch (error) {
+        console.error("Error fetching bookmarked posts:", error);
+        // Handle error if needed
+      }
+    };
+    fetchBookmarkedPosts();
+  }, []);
 
   const handleReplyTextChange = (index, text) => {
     const updatedReplyText = { ...replyText };
@@ -174,14 +193,13 @@ const Home = ({
       const user_id = getUserId();
       const newText = postText;
 
-      await axios.put("http://localhost:8081/post", {
+      await axios.put(`http://localhost:8081/post/}`, {
         user_id: user_id,
-        post_id: post_id,
         text: newText,
       });
 
       const updatedPosts = displayedText.map((post, index) => {
-        if (index === post_id) {
+        if (post.id === post_id) {
           return newText;
         }
         return post;
@@ -197,8 +215,8 @@ const Home = ({
   const handleDeleteClick = async (post_id) => {
     try {
       const user_id = getUserId();
-      await axios.delete(`http://localhost:8081/post`, {
-        data: { post_id, user_id },
+      await axios.delete(`http://localhost:8081/post/`, {
+        data: { user_id },
       });
 
       const updatedPosts = posts.filter((post) => post.id !== post_id);
@@ -313,6 +331,7 @@ const Home = ({
                     >
                       Edit
                     </button>
+
                     <button
                       style={drop_btn_style}
                       onClick={() => handleDeleteClick(post.id)}

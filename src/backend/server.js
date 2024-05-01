@@ -328,7 +328,7 @@ app.post("/myBookmark", (req, res) => {
                         FROM Bookmark AS b
                         INNER JOIN Post AS p ON b.post_id = p.id
                         INNER JOIN User AS u ON u.id = p.user_id
-                        WHERE b.user_id = ?`;
+                        WHERE b.user_id = ? ORDER by p.id DESC`;
   db.query(sql, [user_id], (err, result) => {
     if (err) {
       console.error("Error signing in:", err);

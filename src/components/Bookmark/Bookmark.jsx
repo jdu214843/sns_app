@@ -28,20 +28,6 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     setBookmarkedPosts(updatedBookmarkedPosts);
   };
 
-  const buttonParent = {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-  };
-
-  const BtnBookMarkStyle = {
-    marginRight: "10px",
-    marginLeft: "10px",
-    height: "40px",
-
-    alignSelf: "center",
-  };
-
   return (
     <BookmarkParent>
       <BookmarkTitle>
@@ -50,29 +36,43 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
       </BookmarkTitle>
 
       <BookmarkParentChild>
-        {bookmarkedPosts.length > 0 ? (
-          bookmarkedPosts.map((post, index) => (
-            <div key={index}>
-              <PostUserContainer>
-                <MetBookmark>
-                  <UserNiceParent>
-                    <UserIcon2 />
-                    <UserNiceNameContainer>{username}</UserNiceNameContainer>
-                  </UserNiceParent>
-
-                  <div style={buttonParent}>
-                    <BookPost>{post}</BookPost>
-                    <button
-                      style={BtnBookMarkStyle}
-                      onClick={() => handleUnbookmark(index)}
+        {bookmarkedPosts ? (
+          bookmarkedPosts.map((post, index) => {
+            if (post && post.id) {
+              return (
+                <PostUserContainer key={post.id}>
+                  <MetBookmark>
+                    <UserNiceParent>
+                      <UserIcon2 />
+                      <UserNiceNameContainer>{username}</UserNiceNameContainer>
+                    </UserNiceParent>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                      }}
                     >
-                      <DeleteIcon1 />
-                    </button>
-                  </div>
-                </MetBookmark>
-              </PostUserContainer>
-            </div>
-          ))
+                      <BookPost>{post.text}</BookPost>
+                      <button
+                        style={{
+                          marginRight: "10px",
+                          marginLeft: "10px",
+                          height: "40px",
+                          alignSelf: "center",
+                        }}
+                        onClick={() => handleUnbookmark(index)}
+                      >
+                        <DeleteIcon1 />
+                      </button>
+                    </div>
+                  </MetBookmark>
+                </PostUserContainer>
+              );
+            } else {
+              return null;
+            }
+          })
         ) : (
           <p>No bookmarks yet.</p>
         )}

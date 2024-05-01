@@ -50,7 +50,6 @@ const Profile = () => {
           return;
         }
 
-       
         setLoading(false);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -126,8 +125,9 @@ const Profile = () => {
     display: "flex",
   };
   const ImageStyle = {
-    width: "50px",
-    height: "50px",
+    width: "100px",
+    height: "100px",
+    borderRadius: "50%",
   };
 
   const EditInput = {
@@ -149,6 +149,7 @@ const Profile = () => {
       </ProfileTitle>
       <ProfileLoginImg>
         <ProfileImgIcon>
+          {imageUrl && <img style={ImageStyle} src={imageUrl} alt="Profile" />}
           <input type="file" onChange={handleFileChange} />
           <button
             style={{ width: "100px", padding: "5px", marginTop: "5px" }}
@@ -156,11 +157,7 @@ const Profile = () => {
           >
             Add Img
           </button>{" "}
-          <div>
-            {imageUrl && (
-              <img style={ImageStyle} src={imageUrl} alt="Profile" />
-            )}
-          </div>
+          <div></div>
         </ProfileImgIcon>
         <ProfileLogin>
           <ProfileDescription>
