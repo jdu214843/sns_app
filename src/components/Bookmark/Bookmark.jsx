@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
 import {
   BookmarkTitle,
@@ -22,12 +22,18 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     localStorage.getItem("username") || ""
   );
 
-  const handleUnbookmark = (index) => {
-    const updatedBookmarkedPosts = [...bookmarkedPosts];
-    updatedBookmarkedPosts.splice(index, 1);
-    setBookmarkedPosts(updatedBookmarkedPosts);
+  const handleUnbookmark = (post_id) => {
+    setBookmarkedPosts((prevBookmarkedPosts) =>
+      prevBookmarkedPosts.filter((post) => post.id !== post_id)
+    );
   };
 
+  // Filter out only bookmarked posts
+  const bookmarkedPostsToShow = bookmarkedPosts.filter(
+    (post) => post.bookmarked
+  );
+
+ 
   return (
     <BookmarkParent>
       <BookmarkTitle>
@@ -36,46 +42,37 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
       </BookmarkTitle>
 
       <BookmarkParentChild>
-        {bookmarkedPosts ? (
-          bookmarkedPosts.map((post, index) => {
-            if (post && post.id) {
-              return (
-                <PostUserContainer key={post.id}>
-                  <MetBookmark>
-                    <UserNiceParent>
-                      <UserIcon2 />
-                      <UserNiceNameContainer>{username}</UserNiceNameContainer>
-                    </UserNiceParent>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <BookPost>{post.text}</BookPost>
-                      <button
-                        style={{
-                          marginRight: "10px",
-                          marginLeft: "10px",
-                          height: "40px",
-                          alignSelf: "center",
-                        }}
-                        onClick={() => handleUnbookmark(index)}
-                      >
-                        <DeleteIcon1 />
-                      </button>
-                    </div>
-                  </MetBookmark>
-                </PostUserContainer>
-              );
-            } else {
-              return null;
-            }
-          })
-        ) : (
-          <p>No bookmarks yet.</p>
-        )}
+        {bookmarkedPostsToShow.length > 0 &&
+          bookmarkedPostsToShow.map((bookmarkedPost) => (
+            <PostUserContainer key={bookmarkedPost.id}>
+              <MetBookmark>
+                <UserNiceParent>
+                  <UserIcon2 />
+                  <UserNiceNameContainer>{username}</UserNiceNameContainer>
+                </UserNiceParent>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <BookPost>{bookmarkedPost.text}</BookPost>
+                  <button
+                    style={{
+                      marginRight: "10px",
+                      marginLeft: "10px",
+                      height: "40px",
+                      alignSelf: "center",
+                    }}
+                    onClick={() => handleUnbookmark(bookmarkedPost.id)}
+                  >
+                    <DeleteIcon1 />
+                  </button>
+                </div>
+              </MetBookmark>
+            </PostUserContainer>
+          ))}
       </BookmarkParentChild>
     </BookmarkParent>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   HomeParent,
@@ -92,145 +92,9 @@ const Home = ({
     }
   };
 
-  const handleLikeClick = (index) => {
-    const updatedLikedPosts = [...likedPosts];
-    updatedLikedPosts[index] = !updatedLikedPosts[index];
-    setLikedPosts(updatedLikedPosts);
-
-    if (updatedLikedPosts[index]) {
-      showNotification("Liked!");
-    } else {
-      showNotification("Disliked!");
-    }
-  };
-
-  const showNotification = (message) => {
-    if (!("Notification" in window)) {
-      alert("This browser does not support desktop notification");
-    } else if (Notification.permission === "granted") {
-      new Notification(message);
-    } else if (Notification.permission !== "denied") {
-      Notification.requestPermission().then(function (permission) {
-        if (permission === "granted") {
-          new Notification(message);
-        }
-      });
-    }
-  };
-
-  const handleBookmarkClick = async (index) => {
-    try {
-      const user_id = getUserId();
-      const post_id = index;
-
-      const action = bookmarkedPosts[index] ? "false" : "true";
-
-      const response = await axios.post("http://localhost:8081/bookmark", {
-        user_id: user_id,
-        post_id: post_id,
-        action: action,
-      });
-
-      if (response.status === 200) {
-        const updatedBookmarkedPosts = [...bookmarkedPosts];
-        if (action === "true") {
-          updatedBookmarkedPosts[index] = true;
-        } else {
-          delete updatedBookmarkedPosts[index];
-        }
-        setBookmarkedPosts(updatedBookmarkedPosts);
-        console.log(updatedBookmarkedPosts);
-      }
-    } catch (error) {
-      console.error("Error bookmarking post:", error);
-    }
-  };
-
+  // Fetch all posts
   useEffect(() => {
-    const fetchBookmarkedPosts = async () => {
-      try {
-        const user_id = getUserId();
-        const response = await axios.post("http://localhost:8081/myBookmark", {
-          user_id: user_id,
-        });
-
-        const bookmarkedPostsData = response.data.posts;
-
-        setBookmarkedPosts(bookmarkedPostsData);
-      } catch (error) {
-        console.error("Error fetching bookmarked posts:", error);
-        // Handle error if needed
-      }
-    };
-    fetchBookmarkedPosts();
-  }, []);
-
-  const handleReplyTextChange = (index, text) => {
-    const updatedReplyText = { ...replyText };
-    updatedReplyText[index] = text;
-    setReplyText(updatedReplyText);
-  };
-
-  const handleReplySubmit = (index) => {
-    if (replyText[index] && replyText[index].trim()) {
-      const updatedReplies = [...replies];
-      if (!updatedReplies[index]) {
-        updatedReplies[index] = [];
-      }
-      updatedReplies[index].push(replyText[index].trim());
-      setReplies(updatedReplies);
-      setReplyText((prev) => ({ ...prev, [index]: "" }));
-      setReplyingToPost(null);
-    }
-  };
-
-  const handleReplyIconClick = (index) => {
-    setReplyingToPost((prevIndex) => (prevIndex === index ? null : index));
-  };
-
-  const handleEditClick = async (post_id) => {
-    try {
-      const user_id = getUserId();
-      const newText = postText;
-
-      await axios.put(`http://localhost:8081/post/}`, {
-        user_id: user_id,
-        text: newText,
-      });
-
-      const updatedPosts = displayedText.map((post, index) => {
-        if (post.id === post_id) {
-          return newText;
-        }
-        return post;
-      });
-      setDisplayedText(updatedPosts);
-      setPostText("");
-      setCurrentPostIndex(null);
-    } catch (error) {
-      console.error("Error updating post:", error);
-    }
-  };
-
-  const handleDeleteClick = async (post_id) => {
-    try {
-      const user_id = getUserId();
-      await axios.delete(`http://localhost:8081/post/`, {
-        data: { user_id },
-      });
-
-      const updatedPosts = posts.filter((post) => post.id !== post_id);
-      setPosts(updatedPosts);
-      setLikedPosts((prev) => prev.filter((_, i) => i !== post_id));
-      setBookmarkedPosts((prev) => prev.filter((_, i) => i !== post_id));
-      setReplies((prev) => prev.filter((_, i) => i !== post_id));
-    } catch (error) {
-      console.error("Error deleting post:", error);
-    }
-  };
-
-  const user_id = getUserId();
-  useEffect(() => {
+    const user_id = getUserId();
     const fetchPosts = async () => {
       try {
         const response = await axios.post("http://localhost:8081/posts", {
@@ -245,6 +109,35 @@ const Home = ({
     };
     fetchPosts();
   }, []);
+
+  // Function placeholders
+  const handleEditClick = (postId) => {
+    // Implement edit logic here
+  };
+
+  const handleDeleteClick = (postId) => {
+    // Implement delete logic here
+  };
+
+  const handleLikeClick = (postId) => {
+    // Implement like logic here
+  };
+
+  const handleReplyIconClick = (postId) => {
+    // Implement reply icon click logic here
+  };
+
+  const handleBookmarkClick = (postId) => {
+    // Implement bookmark logic here
+  };
+
+  const handleReplyTextChange = (postId, text) => {
+    // Implement reply text change logic here
+  };
+
+  const handleReplySubmit = (postId) => {
+    // Implement reply submit logic here
+  };
 
   const InputStyle = {
     width: "100%",
