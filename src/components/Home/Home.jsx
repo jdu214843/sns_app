@@ -54,69 +54,111 @@ const Home = ({
     return localStorage.getItem("id");
   };
 
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || ""
+  );
   const handlePostButtonClick = async () => {
     const currentPostText = postText;
 
     if (currentPostIndex !== null) {
-      const updatedPosts = [...displayedText];
-      updatedPosts[currentPostIndex] = currentPostText;
-      setDisplayedText(updatedPosts);
-      setCurrentPostIndex(null);
-    } else {
-      setDisplayedText([...displayedText, currentPostText]);
-      setReplies([...replies, []]);
-    }
-    setPostText("");
-
-    try {
-      const user_id = getUserId();
-      let responseData;
-
-      if (currentPostIndex === null) {
-        const response = await axios.post("http://localhost:8081/post", {
+      // If currentPostIndex is not null, it means we're editing an existing post
+      try {
+        const user_id = getUserId();
+        const postIdToUpdate = posts[currentPostIndex].id;
+        await axios.put(`http://localhost:8081/post/${postIdToUpdate}`, {
           text: currentPostText,
           user_id: user_id,
         });
-        responseData = response.data;
-      } else {
-        await axios.put(`http://localhost:8081/post/${currentPostIndex}`, {
-          text: currentPostText,
-          user_id: user_id,
-        });
-        return;
+
+        // Update the post text in the local state
+        const updatedPosts = [...posts];
+        updatedPosts[currentPostIndex].text = currentPostText;
+        setPosts(updatedPosts);
+
+        // Clear the post text and currentPostIndex state
+        setPostText("");
+        setCurrentPostIndex(null);
+      } catch (error) {
+        console.error("Error while updating post:", error);
       }
+    } else {
+      const user_id = getUserId();
+      const newPostText = postText;
 
-      setPosts((prevPosts) => [...prevPosts, responseData]);
-    } catch (error) {
-      console.error("Error while posting:", error);
+      try {
+        const response = await axios.post("http://localhost:8081/post", {
+          text: newPostText,
+          user_id: user_id,
+        });
+
+        if (response.status === 200) {
+          // Post creation successful
+          const newPost = {
+            id: response.data.post_id,
+            text: newPostText,
+            username: username,
+          };
+
+          setPosts([...posts, newPost]);
+
+          // Clear the post text
+          setPostText("");
+        } else {
+          // Post creation failed
+          console.error("Error creating post");
+        }
+      } catch (error) {
+        console.error("Error creating post:", error);
+      }
     }
   };
 
   // Fetch all posts
+
   useEffect(() => {
-    const user_id = getUserId();
-    const fetchPosts = async () => {
-      try {
-        const response = await axios.post("http://localhost:8081/posts", {
-          params: {
-            user_id: user_id,
-          },
-        });
-        setPosts(response.data.posts);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
     fetchPosts();
   }, []);
 
-  // Function placeholders
-  const handleEditClick = (postId) => {
-    // Implement edit logic here
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.post("http://localhost:8081/posts", {
+        user_id: getUserId(),
+      });
+      setPosts(response.data.posts);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    }
   };
 
-  const handleDeleteClick = (postId) => {
-    // Implement delete logic here
+  // Function placeholders
+  const handleEditClick = (postId) => {
+    // Find the index of the post in the array
+    const index = posts.findIndex((post) => post.id === postId);
+    // Get the post text
+    const postText = posts[index].text;
+    // Set the post text in the input field for editing
+    setPostText(postText);
+    // Set the current post index for tracking which post is being edited
+    setCurrentPostIndex(index);
+  };
+
+  const handleDeleteClick = async (postId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8081/post/${postId}`,
+        {
+          params: {
+            user_id: getUserId(),
+          },
+        }
+      );
+      if (response.status === 200) {
+        const updatedPosts = posts.filter((post) => post.id !== postId);
+        setPosts(updatedPosts);
+      }
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
 
   const handleLikeClick = (postId) => {
@@ -202,87 +244,94 @@ const Home = ({
       </HomePost>
 
       <PostContainer>
-        {posts.map((post, index) => (
-          <PostText key={index}>
-            <PostUserContainer>
-              <MeatBox>
-                <UserIcon2 />
-                <UserNiceNameContainer>{post.username}</UserNiceNameContainer>
-              </MeatBox>
-              <div style={{ position: "relative" }}>
-                <HorizontalMeatballIcon
-                  onClick={() => toggleDropdown(post.id)}
-                />
-                {isDropdownOpen === post.id && (
-                  <CrudBtn
-                    id={`CrudElementBtn-${post.id}`}
-                    style={{ position: "absolute", top: "20px", right: "20px" }}
-                  >
-                    <button
-                      style={drop_btn_style}
-                      onClick={() => handleEditClick(post.id)}
+        {posts &&
+          posts.map((post, index) => (
+            <PostText key={index}>
+              <PostUserContainer>
+                <MeatBox>
+                  <UserIcon2 />
+                  <UserNiceNameContainer>{post.username}</UserNiceNameContainer>
+                </MeatBox>
+                <div style={{ position: "relative" }}>
+                  <HorizontalMeatballIcon
+                    onClick={() => toggleDropdown(post.id)}
+                  />
+                  {isDropdownOpen === post.id && (
+                    <CrudBtn
+                      id={`CrudElementBtn-${post.id}`}
+                      style={{
+                        position: "absolute",
+                        top: "20px",
+                        right: "20px",
+                      }}
                     >
-                      Edit
-                    </button>
+                      <button
+                        style={drop_btn_style}
+                        onClick={() => handleEditClick(post.id)}
+                      >
+                        Edit
+                      </button>
 
-                    <button
-                      style={drop_btn_style}
-                      onClick={() => handleDeleteClick(post.id)}
-                    >
-                      Delete
-                    </button>
-                  </CrudBtn>
-                )}
-              </div>
-            </PostUserContainer>
+                      <button
+                        style={drop_btn_style}
+                        onClick={() => handleDeleteClick(post.id)}
+                      >
+                        Delete
+                      </button>
+                    </CrudBtn>
+                  )}
+                </div>
+              </PostUserContainer>
 
-            <PostTextContainer>{post.text}</PostTextContainer>
+              <PostTextContainer>{post.text}</PostTextContainer>
 
-            <IconContainer>
-              <StyledIconButton>
-                <FavoriteIconStyle
-                  onClick={() => handleLikeClick(post.id)}
-                  style={{ color: likedPosts[post.id] ? "red" : "inherit" }}
-                />
-                <CommentIconStyle
-                  onClick={() => handleReplyIconClick(post.id)}
+              <IconContainer>
+                <StyledIconButton>
+                  <FavoriteIconStyle
+                    onClick={() => handleLikeClick(post.id)}
+                    style={{ color: likedPosts[post.id] ? "red" : "inherit" }}
+                  />
+                  <CommentIconStyle
+                    onClick={() => handleReplyIconClick(post.id)}
+                    style={{
+                      color: replyingToPost === post.id ? "blue" : "inherit",
+                    }}
+                  />
+                </StyledIconButton>
+                <BookmarkIconStyle
+                  onClick={() => handleBookmarkClick(post.id)}
                   style={{
-                    color: replyingToPost === post.id ? "blue" : "inherit",
+                    color: bookmarkedPosts[post.id] ? "blue" : "inherit",
                   }}
                 />
-              </StyledIconButton>
-              <BookmarkIconStyle
-                onClick={() => handleBookmarkClick(post.id)}
-                style={{ color: bookmarkedPosts[post.id] ? "blue" : "inherit" }}
-              />
-            </IconContainer>
+              </IconContainer>
 
-            <div style={replyBox}>
-              {replies[post.id] &&
-                replies[post.id].map((reply, replyIndex) => (
-                  <div key={replyIndex}>
-                    <p style={replyPstyle}>{reply}</p>
-                  </div>
-                ))}
-            </div>
-
-            {replyingToPost === post.id && (
               <div style={replyBox}>
-                <Input
-                  type="text"
-                  value={replyText[post.id] || ""}
-                  onChange={(e) =>
-                    handleReplyTextChange(post.id, e.target.value)
-                  }
-                  placeholder="Write a reply..."
-                />
-                <Button onClick={() => handleReplySubmit(post.id)}>
-                  Reply
-                </Button>
+                {replies[post.id] &&
+                  replies[post.id].map((reply, replyIndex) => (
+                    <div key={replyIndex}>
+                      <p style={replyPstyle}>{reply}</p>
+                    </div>
+                  ))}
               </div>
-            )}
-          </PostText>
-        ))}
+
+              {replyingToPost === post.id && (
+                <div style={replyBox}>
+                  <Input
+                    type="text"
+                    value={replyText[post.id] || ""}
+                    onChange={(e) =>
+                      handleReplyTextChange(post.id, e.target.value)
+                    }
+                    placeholder="Write a reply..."
+                  />
+                  <Button onClick={() => handleReplySubmit(post.id)}>
+                    Reply
+                  </Button>
+                </div>
+              )}
+            </PostText>
+          ))}
       </PostContainer>
     </HomeParent>
   );

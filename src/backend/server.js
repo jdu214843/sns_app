@@ -128,31 +128,43 @@ app.post("/post", (req, res) => {
 });
 
 // Delete Post
-app.delete("/post", (req, res) => {
-  const { post_id, user_id } = req.body;
-  const sql = "DELETE FROM Post WHERE id = ? and user_id = ?";
-  db.query(sql, [post_id, user_id], (err, result) => {
+app.delete("/post/:id", (req, res) => {
+  const postId = req.params.id; // Extract post_id from URL parameters
+  const userId = req.query.user_id; // Extract user_id from query parameters
+
+  const sql = "DELETE FROM Post WHERE id = ? AND user_id = ?";
+  db.query(sql, [postId, userId], (err, result) => {
     if (err) {
       console.error("Error deleting post:", err);
       return res.status(500).json({ error: "Error deleting post" });
+    }
+    if (result.affectedRows === 0) {
+      // If no rows were affected, it means the post was not found or the user is not authorized to delete it
+      return res.status(404).json({ error: "Post not found or unauthorized" });
     }
     return res.json({ message: "Post deleted successfully" });
   });
 });
 
 // Update Post
-app.put("/post", (req, res) => {
-  const { user_id, post_id, text } = req.body;
+app.put("/post/:id", (req, res) => {
+  const postId = req.params.id;
+  const { user_id, text } = req.body;
 
   const sql = "UPDATE Post SET text = ? WHERE id = ? AND user_id = ?";
-  db.query(sql, [text, post_id, user_id], (err, result) => {
+  db.query(sql, [text, postId, user_id], (err, result) => {
     if (err) {
-      console.error("Error updating profile:", err);
+      console.error("Error updating post:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
+    if (result.affectedRows === 0) {
+      // No rows were affected, indicating that the post was not updated
+      return res.status(404).json({ error: "Post not found or unauthorized" });
+    }
+
     return res.status(200).json({
-      message: "Edit updated successfully",
+      message: "Post updated successfully",
     });
   });
 });
