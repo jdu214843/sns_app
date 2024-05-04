@@ -161,25 +161,84 @@ const Home = ({
     }
   };
 
-  const handleLikeClick = (postId) => {
-    // Implement like logic here
+  const handleLikeClick = async (postId) => {
+    try {
+      const user_id = getUserId();
+      const isLiked = likedPosts[postId]; // Check if the post is liked
+
+      const response = isLiked
+        ? await axios.post(`http://localhost:8081/like`, {
+            user_id: user_id,
+            post_id: postId,
+            action: false,
+          })
+        : await axios.post(`http://localhost:8081/like`, {
+            user_id: user_id,
+            post_id: postId,
+            action: true,
+          });
+
+      if (response.status === 200) {
+        // If the request is successful, update the liked status in state
+        setLikedPosts((prevLikedPosts) => ({
+          ...prevLikedPosts,
+          [postId]: !isLiked, // Toggle the like status
+        }));
+        console.log(
+          `Post ${postId} ${isLiked ? "unliked" : "liked"} successfully`
+        );
+      } else {
+        // Handle other response statuses, if needed
+        console.error("Failed to toggle like: Unexpected status code");
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+    }
   };
 
   const handleReplyIconClick = (postId) => {
-    // Implement reply icon click logic here
+    // Set the postId to indicate which post the user is replying to
+    setReplyingToPost(postId);
+  };
+
+  const handleReplyTextChange = (postId, text) => {
+    // Update the reply text for the specific post
+    setReplyText({ ...replyText, [postId]: text });
+  };
+
+  const handleReplySubmit = async (postId) => {
+    try {
+      // Send the reply text to the server
+      const response = await axios.post("http://localhost:8081/comment", {
+        text: replyText[postId],
+        post_id: postId,
+        user_id: getUserId(),
+      });
+
+      // If the reply is successfully added, fetch the updated posts
+      if (response.status === 200) {
+        fetchPosts(); // Call the fetchPosts function to update the list of posts
+        setReplyText({ ...replyText, [postId]: "" }); // Clear the reply text input for the specific post
+        setReplyingToPost(null); // Reset the replyingToPost state to null
+      } else {
+        console.error("Failed to add reply");
+      }
+    } catch (error) {
+      console.error("Error adding reply:", error);
+    }
   };
 
   const handleBookmarkClick = (postId) => {
     // Implement bookmark logic here
   };
 
-  const handleReplyTextChange = (postId, text) => {
-    // Implement reply text change logic here
-  };
+  // const handleReplyTextChange = (postId, text) => {
+  //   // Implement reply text change logic here
+  // };
 
-  const handleReplySubmit = (postId) => {
-    // Implement reply submit logic here
-  };
+  // const handleReplySubmit = (postId) => {
+  //   // Implement reply submit logic here
+  // };
 
   const InputStyle = {
     width: "100%",
@@ -291,13 +350,13 @@ const Home = ({
                     onClick={() => handleLikeClick(post.id)}
                     style={{ color: likedPosts[post.id] ? "red" : "inherit" }}
                   />
-                  <CommentIconStyle
-                    onClick={() => handleReplyIconClick(post.id)}
-                    style={{
-                      color: replyingToPost === post.id ? "blue" : "inherit",
-                    }}
-                  />
                 </StyledIconButton>
+                <CommentIconStyle
+                  onClick={() => handleReplyIconClick(post.id)}
+                  style={{
+                    color: replyingToPost === post.id ? "blue" : "inherit",
+                  }}
+                />
                 <BookmarkIconStyle
                   onClick={() => handleBookmarkClick(post.id)}
                   style={{
@@ -306,14 +365,20 @@ const Home = ({
                 />
               </IconContainer>
 
-              <div style={replyBox}>
-                {replies[post.id] &&
-                  replies[post.id].map((reply, replyIndex) => (
-                    <div key={replyIndex}>
-                      <p style={replyPstyle}>{reply}</p>
-                    </div>
-                  ))}
-              </div>
+              {/* Render replies */}
+              {/* {post.replies.map((reply, replyIndex) => (
+                <div key={replyIndex}>
+                  <p style={replyPstyle}>{reply}</p>
+                </div>
+              ))} */}
+
+              {/* Render replies */}
+              {Array.isArray(post.replies) &&
+                post.replies.map((reply, replyIndex) => (
+                  <div key={replyIndex}>
+                    <p style={replyPstyle}>{reply}</p>
+                  </div>
+                ))}
 
               {replyingToPost === post.id && (
                 <div style={replyBox}>

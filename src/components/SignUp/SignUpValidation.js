@@ -3,10 +3,10 @@ function Validation(values) {
   const email_pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const password_pattern = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z0-9]/;
 
-  if (!values.fullname) {
-    error.fullname = "Full name is required.";
+  if (!values.full_name) {
+    error.full_name = "Full name is required.";
   } else {
-    error.fullname = "";
+    error.full_name = "";
   }
   if (!values.username) {
     error.username = "user name is required.";
