@@ -21,6 +21,7 @@ import {
   CommentIconStyle,
   BookmarkIconStyle,
   CrudBtn,
+  ReplyBox,
 } from "./style";
 
 const Home = ({
@@ -124,7 +125,16 @@ const Home = ({
       const response = await axios.post("http://localhost:8081/posts", {
         user_id: getUserId(),
       });
-      setPosts(response.data.posts);
+      const postsWithReplies = await Promise.all(
+        response.data.posts.map(async (post) => {
+          const response = await axios.get(
+            `http://localhost:8081/comment/${post.id}`
+          );
+          post.replies = response.data.replies;
+          return post;
+        })
+      );
+      setPosts(postsWithReplies);
     } catch (error) {
       console.error("Error fetching posts:", error);
     }
@@ -196,12 +206,23 @@ const Home = ({
     }
   };
 
-  const handleReplyIconClick = (postId) => {
-    setReplyingToPost(postId);
+  const handleReplyIconClick = (postId, index) => {
+    if (replyingToPost === postId) {
+      // Close the reply box
+      setReplyingToPost(null);
+    } else {
+      // Open the reply box for the post with postId
+      setReplyingToPost(postId);
+    }
+    // Toggle dropdown for the post
+    setIsDropdownOpen(isDropdownOpen === index ? null : index);
   };
 
   const handleReplyTextChange = (postId, text) => {
-    setReplyText({ ...replyText, [postId]: text });
+    setReplyText((prevReplyText) => ({
+      ...prevReplyText,
+      [postId]: text,
+    }));
   };
 
   const handleReplySubmit = async (postId) => {
@@ -212,7 +233,6 @@ const Home = ({
         user_id: getUserId(),
       });
 
-      // If the reply is successfully added, fetch the updated posts
       if (response.status === 200) {
         fetchPosts(); // Call the fetchPosts function to update the list of posts
         setReplyText({ ...replyText, [postId]: "" }); // Clear the reply text input for the specific post
@@ -225,17 +245,61 @@ const Home = ({
     }
   };
 
-  const handleBookmarkClick = (postId) => {
-    // Implement bookmark logic here
+  // Function to handle clicking the bookmark icon
+  const handleBookmarkClick = async (postId) => {
+    try {
+      const user_id = getUserId();
+      const action = !bookmarkedPosts[postId]; // Toggle bookmark status
+
+      const response = await axios.post("http://localhost:8081/bookmark", {
+        user_id: user_id,
+        post_id: postId,
+        action: action,
+      });
+
+      if (response.status === 200) {
+        // If the request is successful, update the bookmarked status in state
+        setBookmarkedPosts((prevBookmarkedPosts) => ({
+          ...prevBookmarkedPosts,
+          [postId]: action, // Toggle the bookmark status
+        }));
+        console.log(
+          `Post ${postId} ${
+            action ? "bookmarked" : "unbookmarked"
+          } successfully`
+        );
+      } else {
+        // Handle other response statuses, if needed
+        console.error("Failed to toggle bookmark: Unexpected status code");
+      }
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    }
   };
 
-  // const handleReplyTextChange = (postId, text) => {
-  //   // Implement reply text change logic here
-  // };
-
-  // const handleReplySubmit = (postId) => {
-  //   // Implement reply submit logic here
-  // };
+  const handleUnbookmark = async (postId) => {
+    try {
+      const user_id = getUserId();
+      const response = await axios.post("http://localhost:8081/unbookmark", {
+        user_id: user_id,
+        post_id: postId,
+        action: false, // Assuming you want to unbookmark the post
+      });
+      if (response.status === 200) {
+        // Update local state to remove the unbookmarked post
+        setBookmarkedPosts((prevBookmarkedPosts) => {
+          const updatedBookmarkedPosts = { ...prevBookmarkedPosts };
+          delete updatedBookmarkedPosts[postId]; // Remove the post from bookmarked posts
+          return updatedBookmarkedPosts;
+        });
+        console.log("Post unbookmarked successfully");
+      } else {
+        console.error("Failed to unbookmark post: Unexpected status code");
+      }
+    } catch (error) {
+      console.error("Error unbookmarking post:", error);
+    }
+  };
 
   const InputStyle = {
     width: "100%",
@@ -268,11 +332,11 @@ const Home = ({
 
   const replyBox = {
     marginLeft: "70px",
+    width: "100%",
   };
 
   const replyPstyle = {
-    borderTop: "1px solid #eae7e7",
-    padding: "10px",
+    borderTop: "1px solid #000000",
   };
 
   return (
@@ -339,21 +403,27 @@ const Home = ({
                 </div>
               </PostUserContainer>
               <PostTextContainer>{post.text}</PostTextContainer>
+
               <IconContainer>
                 <StyledIconButton>
                   <FavoriteIconStyle
                     onClick={() => handleLikeClick(post.id)}
                     style={{ color: likedPosts[post.id] ? "red" : "inherit" }}
                   />
+                  <CommentIconStyle
+                    onClick={() => handleReplyIconClick(post.id)}
+                    style={{
+                      color: replyingToPost === post.id ? "blue" : "inherit",
+                    }}
+                  />
                 </StyledIconButton>
-                <CommentIconStyle
-                  onClick={() => handleReplyIconClick(post.id)}
-                  style={{
-                    color: replyingToPost === post.id ? "blue" : "inherit",
-                  }}
-                />
+
                 <BookmarkIconStyle
-                  onClick={() => handleBookmarkClick(post.id)}
+                  onClick={() =>
+                    bookmarkedPosts[post.id]
+                      ? handleUnbookmark(post.id)
+                      : handleBookmarkClick(post.id)
+                  }
                   style={{
                     color: bookmarkedPosts[post.id] ? "blue" : "inherit",
                   }}
@@ -361,35 +431,32 @@ const Home = ({
               </IconContainer>
 
               {/* Render replies */}
-              {/* {post.replies.map((reply, replyIndex) => (
-                <div key={replyIndex}>
-                  <p style={replyPstyle}>{reply}</p>
-                </div>
-              ))} */}
-
-              {/* Render replies */}
-              {Array.isArray(post.replies) &&
-                post.replies.map((reply, replyIndex) => (
-                  <div key={replyIndex}>
-                    <p style={replyPstyle}>{reply}</p>
+              <ReplyBox>
+                {replyingToPost === post.id && (
+                  <div style={replyBox}>
+                    <div>
+                      {Array.isArray(post.replies) &&
+                        post.replies.map((reply, index) => (
+                          <div key={index}>
+                            <p style={replyPstyle}>{reply.text}</p>
+                            {console.log(reply.text)}
+                          </div>
+                        ))}
+                    </div>
+                    <Input
+                      type="text"
+                      value={replyText[post.id] || ""}
+                      onChange={(e) =>
+                        handleReplyTextChange(post.id, e.target.value)
+                      }
+                      placeholder="Write a reply..."
+                    />
+                    <Button onClick={() => handleReplySubmit(post.id)}>
+                      Reply
+                    </Button>
                   </div>
-                ))}
-
-              {replyingToPost === post.id && (
-                <div style={replyBox}>
-                  <Input
-                    type="text"
-                    value={replyText[post.id] || ""}
-                    onChange={(e) =>
-                      handleReplyTextChange(post.id, e.target.value)
-                    }
-                    placeholder="Write a reply..."
-                  />
-                  <Button onClick={() => handleReplySubmit(post.id)}>
-                    Reply
-                  </Button>
-                </div>
-              )}
+                )}
+              </ReplyBox>
             </PostText>
           ))}
       </PostContainer>

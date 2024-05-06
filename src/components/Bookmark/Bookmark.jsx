@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyledIcon } from "../Style/StyledBottomNavigationAction";
+import axios from "axios";
 import {
   BookmarkTitle,
   BookmarkArrow,
@@ -17,38 +17,72 @@ import {
   UserNiceNameContainer,
 } from "../Home/style";
 
-const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
-  const [username, setUsername] = useState(
-    localStorage.getItem("username") || ""
-  );
+const getUserId = () => {
+  return localStorage.getItem("id");
+};
 
-  const handleUnbookmark = (post_id) => {
-    setBookmarkedPosts((prevBookmarkedPosts) =>
-      prevBookmarkedPosts.filter((post) => post.id !== post_id)
-    );
+const Bookmark = () => {
+  const [bookmarks, setBookmarks] = useState([]);
+
+  // Function to fetch bookmarks from the server
+  const fetchBookmarks = async () => {
+    try {
+      const user_id = getUserId();
+      const response = await axios.post("http://localhost:8081/myBookmark", {
+        user_id,
+      });
+      if (response.status === 200) {
+        setBookmarks(response.data.posts);
+      } else {
+        console.error("Failed to fetch bookmarks: Unexpected status code");
+      }
+    } catch (error) {
+      console.error("Error fetching bookmarks:", error);
+    }
   };
 
-  // Filter out only bookmarked posts
-  const bookmarkedPostsToShow = bookmarkedPosts.filter(
-    (post) => post.bookmarked
-  );
+  // unbookmarks
+  const handleUnbookmark = async (postId) => {
+    try {
+      const user_id = getUserId();
+      const response = await axios.post("http://localhost:8081/unbookmark", {
+        user_id: user_id,
+        post_id: postId,
+        action: false,
+      });
+      if (response.status === 200) {
+        setBookmarks((prevBookmarks) => {
+          return prevBookmarks.filter((bookmark) => bookmark.id !== postId);
+        });
+        console.log("Post unbookmarked successfully");
+      } else {
+        console.error("Failed to unbookmark post: Unexpected status code");
+      }
+    } catch (error) {
+      console.error("Error unbookmarking post:", error);
+    }
+  };
 
- 
+  useEffect(() => {
+    fetchBookmarks();
+  }, []);
+
   return (
     <BookmarkParent>
       <BookmarkTitle>
         <BookmarkArrow />
         <BookmarkH3>Bookmarks</BookmarkH3>
       </BookmarkTitle>
-
-      <BookmarkParentChild>
-        {bookmarkedPostsToShow.length > 0 &&
-          bookmarkedPostsToShow.map((bookmarkedPost) => (
-            <PostUserContainer key={bookmarkedPost.id}>
+      {bookmarks && bookmarks.length > 0 ? (
+        bookmarks.map((bookmark) => (
+          <BookmarkParentChild key={bookmark.id}>
+            <PostUserContainer>
               <MetBookmark>
                 <UserNiceParent>
                   <UserIcon2 />
-                  <UserNiceNameContainer>{username}</UserNiceNameContainer>
+                  <UserNiceNameContainer>
+                    {bookmark.username}
+                  </UserNiceNameContainer>
                 </UserNiceParent>
                 <div
                   style={{
@@ -57,7 +91,7 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                     justifyContent: "space-between",
                   }}
                 >
-                  <BookPost>{bookmarkedPost.text}</BookPost>
+                  <BookPost>{bookmark.text}</BookPost>
                   <button
                     style={{
                       marginRight: "10px",
@@ -65,15 +99,18 @@ const Bookmark = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                       height: "40px",
                       alignSelf: "center",
                     }}
-                    onClick={() => handleUnbookmark(bookmarkedPost.id)}
+                    onClick={() => handleUnbookmark(bookmark.id)}
                   >
                     <DeleteIcon1 />
                   </button>
                 </div>
               </MetBookmark>
             </PostUserContainer>
-          ))}
-      </BookmarkParentChild>
+          </BookmarkParentChild>
+        ))
+      ) : (
+        <p>No bookmarks found.</p>
+      )}
     </BookmarkParent>
   );
 };

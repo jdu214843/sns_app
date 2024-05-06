@@ -114,6 +114,9 @@ const HorizontalMeatballIcon = styled(MeatballIcon)({
   },
 });
 
+const ReplyBox = styled.div`
+  width: 100%;
+`;
 const CrudBtn = styled.div`
   display: flex;
   flex-direction: column;
@@ -133,6 +136,7 @@ const BookmarkIconStyle = styled(BookmarkIcon)({
 export {
   HomeParent,
   Input,
+  ReplyBox,
   Button,
   HomePost,
   HomeClocks,

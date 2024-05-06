@@ -333,6 +333,22 @@ app.post("/bookmark", (req, res) => {
   });
 });
 
+// un bookmark
+
+// Unbookmark Post
+app.post("/unbookmark", (req, res) => {
+  const { user_id, post_id } = req.body;
+
+  const sql = "DELETE FROM `Bookmark` WHERE `user_id` = ? AND `post_id` = ?";
+  db.query(sql, [user_id, post_id], (err, data) => {
+    if (err) {
+      console.error("Error unbookmarking post:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    return res.status(200).json({ message: "post unbookmarked successfully" });
+  });
+});
+
 // Get Bookmark List
 app.post("/myBookmark", (req, res) => {
   const { user_id } = req.body;
