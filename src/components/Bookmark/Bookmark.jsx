@@ -67,6 +67,13 @@ const Bookmark = () => {
     fetchBookmarks();
   }, []);
 
+  const BookmarkLineStyle = {
+    display: "flex",
+    flexdirection: "row",
+    justifyContent: "space-between",
+    borderBottom: "1px solid rgba(0, 0, 0, 0.2)",
+    paddingBottom: "20px",
+  };
   return (
     <BookmarkParent>
       <BookmarkTitle>
@@ -84,13 +91,7 @@ const Bookmark = () => {
                     {bookmark.username}
                   </UserNiceNameContainer>
                 </UserNiceParent>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
+                <div style={BookmarkLineStyle}>
                   <BookPost>{bookmark.text}</BookPost>
                   <button
                     style={{

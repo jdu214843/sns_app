@@ -83,6 +83,7 @@ const LogDiv = styled.div`
   flex-direction: column;
   outline: none;
   border: none;
+
   margin-left: 20px;
   margin-bottom: 20px;
 `;
@@ -93,8 +94,7 @@ const ProfileDescription = styled.div`
 `;
 
 const LogOutDiv = styled.div`
-  width: 70px;
-
+  width: 60px;
   color: black;
   cursor: pointer;
   font-weight: 600;

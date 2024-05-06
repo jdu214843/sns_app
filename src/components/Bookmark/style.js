@@ -63,6 +63,7 @@ const BookPost = styled.div`
 
   align-self: center;
 `;
+
 const DeleteIcon1 = styled(DeleteIcon)``;
 
 export {
