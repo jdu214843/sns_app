@@ -40,12 +40,11 @@ const SignUp = () => {
           password: values.password,
         });
         console.log(res.data); // Optional: Log response data
-        // Redirect or perform any necessary actions upon successful signup
+
         navigate("/");
       } catch (err) {
         console.error("Error signing up:", err);
-        // Handle errors, display appropriate messages to the user
-        // You can access error response data using err.response.data
+
         alert("Error signing up. Please try again.");
       }
     }

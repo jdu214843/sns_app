@@ -197,18 +197,15 @@ const Home = ({
   };
 
   const handleReplyIconClick = (postId) => {
-    // Set the postId to indicate which post the user is replying to
     setReplyingToPost(postId);
   };
 
   const handleReplyTextChange = (postId, text) => {
-    // Update the reply text for the specific post
     setReplyText({ ...replyText, [postId]: text });
   };
 
   const handleReplySubmit = async (postId) => {
     try {
-      // Send the reply text to the server
       const response = await axios.post("http://localhost:8081/comment", {
         text: replyText[postId],
         post_id: postId,
@@ -341,9 +338,7 @@ const Home = ({
                   )}
                 </div>
               </PostUserContainer>
-
               <PostTextContainer>{post.text}</PostTextContainer>
-
               <IconContainer>
                 <StyledIconButton>
                   <FavoriteIconStyle

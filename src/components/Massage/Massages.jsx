@@ -1,7 +1,5 @@
 import React from "react";
 
-import { StyledIcon } from "../Style/StyledBottomNavigationAction";
-
 import { MessagesTitle, MessagesArrow, MessagesH3 } from "./style";
 const Massages = () => {
   return (
