@@ -21,6 +21,7 @@ import {
 const Profile = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [file, setFile] = useState(null);
+  const [data, setData] = useState([]);
   const [email, setEmail] = useState(localStorage.getItem("email") || "");
   const [full_name, setFullname] = useState(
     localStorage.getItem("full_name") || ""
@@ -65,19 +66,38 @@ const Profile = () => {
     setFile(event.target.files[0]);
   };
 
-  const handleUpload = () => {
-    if (!file) {
-      alert("Please select an image to upload");
-      return;
-    }
+  useEffect(() => {
+    axios
+      .get("http://localhost:8081/")
+      .then((res) => {
+        setData(res.data[0]);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataURL = reader.result;
-      setImageUrl(dataURL); // Update image URL in the UI
-      localStorage.setItem("imageUrl", dataURL); // Save image URL to local storage
-    };
-    reader.readAsDataURL(file);
+  const handleUpload = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("user_id", getUserId());
+
+      const response = await axios.post(
+        "http://localhost:8081/uploadImage",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Image uploaded successfully:", response.data);
+
+      setImageUrl(response.data.imageUrl);
+      localStorage.setItem("imageUrl", response.data.imageUrl);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
   };
 
   const handleUpdateProfile = () => {
@@ -127,6 +147,7 @@ const Profile = () => {
   const ImageStyle = {
     width: "100px",
     height: "100px",
+    marginTop: "5px",
     borderRadius: "50%",
   };
 
@@ -151,13 +172,19 @@ const Profile = () => {
         <ProfileImgIcon>
           {imageUrl && <img style={ImageStyle} src={imageUrl} alt="Profile" />}
           <input type="file" onChange={handleFileChange} />
+          <div>
+            <img
+              style={ImageStyle}
+              src={`http://localhost:8081/` + data.image}
+              alt=""
+            />
+          </div>
           <button
-            style={{ width: "100px", padding: "5px", marginTop: "5px" }}
+            style={{ width: "100px", padding: "5px" }}
             onClick={handleUpload}
           >
             Add Img
           </button>{" "}
-          <div></div>
         </ProfileImgIcon>
         <ProfileLogin>
           <ProfileDescription>

@@ -8,6 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("uploads"));
 
 const db = mysql.createConnection({
   host: "localhost",
@@ -17,16 +18,44 @@ const db = mysql.createConnection({
 });
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: (req, file, cb) => {
     cb(null, "uploads/");
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     cb(null, file.originalname);
   },
 });
 
 const upload = multer({ storage: storage });
 
+// Upload Image
+app.post("/uploadImage", upload.single("image"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send("No files were uploaded.");
+  }
+  const image = req.file.filename;
+  const { user_id } = req.body;
+
+  const sql = "UPDATE User SET image = ? WHERE id = ?";
+  db.query(sql, [image, user_id], (err, result) => {
+    if (err) {
+      console.error("Error saving image URL to database:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    console.log("Image URL saved to database");
+    return res.status(200).json({
+      message: "Image URL saved to database",
+    });
+  });
+});
+// get image
+app.get("/", (req, res) => {
+  const sql = "SELECT * FROM User";
+  db.query(sql, (err, result) => {
+    if (err) return res.json({ error: " error" });
+    return res.json(result);
+  });
+});
 // Register
 app.post("/signup", (req, res) => {
   const { full_name, username, email, password } = req.body;
@@ -68,27 +97,6 @@ app.post("/signin", (req, res) => {
     } else {
       return res.status(404).json({ error: "User not found" });
     }
-  });
-});
-
-// Upload Image
-app.post("/uploadImage", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("No files were uploaded.");
-  }
-  const image = req.file.filename;
-  const { user_id } = req.body;
-
-  const sql = "UPDATE User SET image = ? WHERE id = ?";
-  db.query(sql, [image, user_id], (err, result) => {
-    if (err) {
-      console.error("Error saving image URL to database:", err);
-      return res.status(500).json({ error: "Internal server error" });
-    }
-    console.log("Image URL saved to database");
-    return res.status(200).json({
-      message: "Image URL saved to database",
-    });
   });
 });
 
