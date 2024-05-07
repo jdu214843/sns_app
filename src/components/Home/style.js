@@ -36,7 +36,7 @@ const HomeClocks = styled.div``;
 const UserIcon = styled.div`
   width: 40px;
   height: 40px;
-  background: #ffc746;
+
   border-radius: 50%;
   position: absolute;
   top: 30px;

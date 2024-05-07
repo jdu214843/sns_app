@@ -170,7 +170,7 @@ const Profile = () => {
       </ProfileTitle>
       <ProfileLoginImg>
         <ProfileImgIcon>
-          {imageUrl && <img style={ImageStyle} src={imageUrl} alt="Profile" />}
+          {/* {imageUrl && <img style={ImageStyle} src={imageUrl} alt="Profile" />} */}
           <input type="file" onChange={handleFileChange} />
           <div>
             <img

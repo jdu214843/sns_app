@@ -38,6 +38,7 @@ const Home = ({
   const [replyText, setReplyText] = useState({});
   const [replyingToPost, setReplyingToPost] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [data, setData] = useState([]);
 
   const maxLength = 140;
 
@@ -50,6 +51,17 @@ const Home = ({
   const toggleDropdown = (index) => {
     setIsDropdownOpen(isDropdownOpen === index ? null : index);
   };
+
+  // image
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8081/")
+      .then((res) => {
+        setData(res.data[0]);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   const getUserId = () => {
     return localStorage.getItem("id");
@@ -339,10 +351,32 @@ const Home = ({
     borderTop: "1px solid #000000",
   };
 
+  const ImageStyle = {
+    width: "100%",
+    height: "100%",
+    marginLeft: "5px",
+    borderRadius: "50%",
+  };
+  const ImageStyle2 = {
+    width: "30px",
+    height: "30px",
+    marginTop: "5px",
+    marginLeft: "5px",
+    borderRadius: "50%",
+  };
+
   return (
     <HomeParent>
       <HomePost>
-        <UserIcon />
+        <UserIcon>
+          <div>
+            <img
+              style={ImageStyle}
+              src={`http://localhost:8081/` + data.image}
+              alt=""
+            />
+          </div>
+        </UserIcon>
         <Input
           style={InputStyle}
           type="text"
@@ -369,7 +403,12 @@ const Home = ({
             <PostText key={index}>
               <PostUserContainer>
                 <MeatBox>
-                  <UserIcon2 />
+                  <img
+                    style={ImageStyle2}
+                    src={`http://localhost:8081/` + data.image}
+                    alt=""
+                  />
+
                   <UserNiceNameContainer>{post.username}</UserNiceNameContainer>
                 </MeatBox>
                 <div style={{ position: "relative" }}>

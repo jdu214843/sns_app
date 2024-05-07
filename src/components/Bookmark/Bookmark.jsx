@@ -11,18 +11,24 @@ import {
   BookmarkParentChild,
   BookmarkParent,
 } from "./style";
-import {
-  PostUserContainer,
-  UserIcon2,
-  UserNiceNameContainer,
-} from "../Home/style";
-
-const getUserId = () => {
-  return localStorage.getItem("id");
-};
+import { PostUserContainer, UserNiceNameContainer } from "../Home/style";
 
 const Bookmark = () => {
+  const [data, setData] = useState([]);
   const [bookmarks, setBookmarks] = useState([]);
+
+  const getUserId = () => {
+    return localStorage.getItem("id");
+  };
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8081/")
+      .then((res) => {
+        setData(res.data[0]);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   // Function to fetch bookmarks from the server
   const fetchBookmarks = async () => {
@@ -74,6 +80,15 @@ const Bookmark = () => {
     borderBottom: "1px solid rgba(0, 0, 0, 0.2)",
     paddingBottom: "20px",
   };
+
+  const ImageStyle2 = {
+    width: "30px",
+    height: "30px",
+    marginTop: "5px",
+    marginLeft: "5px",
+    borderRadius: "50%",
+  };
+
   return (
     <BookmarkParent>
       <BookmarkTitle>
@@ -86,7 +101,14 @@ const Bookmark = () => {
             <PostUserContainer>
               <MetBookmark>
                 <UserNiceParent>
-                  <UserIcon2 />
+                  <div>
+                    <img
+                      style={ImageStyle2}
+                      src={`http://localhost:8081/` + data.image}
+                      alt=""
+                    />
+                  </div>
+
                   <UserNiceNameContainer>
                     {bookmark.username}
                   </UserNiceNameContainer>
