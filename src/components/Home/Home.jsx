@@ -10,7 +10,6 @@ import {
   PostContainer,
   PostText,
   IconContainer,
-  UserIcon2,
   StyledIconButton,
   PostTextContainer,
   PostUserContainer,
@@ -24,12 +23,7 @@ import {
   ReplyBox,
 } from "./style";
 
-const Home = ({
-  displayedText,
-  setDisplayedText,
-  bookmarkedPosts,
-  setBookmarkedPosts,
-}) => {
+const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
   const [postText, setPostText] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(null);
   const [replies, setReplies] = useState([]);
@@ -51,8 +45,6 @@ const Home = ({
   const toggleDropdown = (index) => {
     setIsDropdownOpen(isDropdownOpen === index ? null : index);
   };
-
-  // image
 
   useEffect(() => {
     axios
@@ -142,7 +134,7 @@ const Home = ({
           const response = await axios.get(
             `http://localhost:8081/comment/${post.id}`
           );
-          post.replies = response.data.replies;
+
           return post;
         })
       );
@@ -152,6 +144,62 @@ const Home = ({
     }
   };
 
+  // Inside the useEffect hook for fetching posts
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  // Inside the fetchPosts function after setting the posts state
+  // Here we populate the likedPosts state based on the posts data
+  useEffect(() => {
+    const likedPostIds = posts.reduce((acc, post) => {
+      if (post.liked) {
+        acc.push(post.id);
+      }
+      return acc;
+    }, []);
+    setLikedPosts(likedPostIds);
+  }, [posts]);
+
+  // Inside the handleFavoriteLike function
+  const handleFavoriteLike = async (postId) => {
+    try {
+      const user_id = getUserId();
+      let action = true; // Default action is liking
+
+      // Check if the post is already liked by the user
+      if (likedPosts.includes(postId)) {
+        // If the post is already liked, then this click will be for disliking
+        action = false;
+      }
+
+      const response = await axios.post("http://localhost:8081/like", {
+        user_id: user_id,
+        post_id: postId,
+        action: action,
+      });
+
+      if (response.status === 200) {
+        console.log(`${action ? "Liked" : "Disliked"} successfully`);
+        // Update the likedPosts state based on the action
+        if (action) {
+          // If the action is liking, add the postId to likedPosts
+          setLikedPosts((prevLikedPosts) => [...prevLikedPosts, postId]);
+        } else {
+          // If the action is disliking, remove the postId from likedPosts
+          setLikedPosts((prevLikedPosts) =>
+            prevLikedPosts.filter((id) => id !== postId)
+          );
+        }
+      } else {
+        console.error(`Failed to ${action ? "like" : "dislike"}`);
+        // Handle the failure case appropriately
+      }
+    } catch (error) {
+      console.error(`Error ${action ? "liking" : "disliking"} post:`, error);
+      // Handle errors such as network issues or server errors
+    }
+  };
   // Function placeholders
   const handleEditClick = (postId) => {
     // Find the index of the post in the array
@@ -180,41 +228,6 @@ const Home = ({
       }
     } catch (error) {
       console.error("Error deleting post:", error);
-    }
-  };
-
-  const handleLikeClick = async (postId) => {
-    try {
-      const user_id = getUserId();
-      const isLiked = likedPosts[postId]; // Check if the post is liked
-
-      const response = isLiked
-        ? await axios.post(`http://localhost:8081/like`, {
-            user_id: user_id,
-            post_id: postId,
-            action: false,
-          })
-        : await axios.post(`http://localhost:8081/like`, {
-            user_id: user_id,
-            post_id: postId,
-            action: true,
-          });
-
-      if (response.status === 200) {
-        // If the request is successful, update the liked status in state
-        setLikedPosts((prevLikedPosts) => ({
-          ...prevLikedPosts,
-          [postId]: !isLiked, // Toggle the like status
-        }));
-        console.log(
-          `Post ${postId} ${isLiked ? "unliked" : "liked"} successfully`
-        );
-      } else {
-        // Handle other response statuses, if needed
-        console.error("Failed to toggle like: Unexpected status code");
-      }
-    } catch (error) {
-      console.error("Error toggling like:", error);
     }
   };
 
@@ -270,10 +283,9 @@ const Home = ({
       });
 
       if (response.status === 200) {
-        // If the request is successful, update the bookmarked status in state
         setBookmarkedPosts((prevBookmarkedPosts) => ({
           ...prevBookmarkedPosts,
-          [postId]: action, // Toggle the bookmark status
+          [postId]: action,
         }));
         console.log(
           `Post ${postId} ${
@@ -313,6 +325,49 @@ const Home = ({
     }
   };
 
+  // Inside the Home component
+
+  const handleEditComment = async (commentId, newText) => {
+    try {
+      const user_id = getUserId();
+      const response = await axios.put("http://localhost:8081/comment", {
+        user_id: user_id,
+        comment_id: commentId,
+        text: newText,
+      });
+
+      if (response.status === 200) {
+        // Update the UI or fetch the posts again to reflect changes
+        fetchPosts();
+        console.log("Comment updated successfully");
+      } else {
+        console.error("Failed to edit comment");
+      }
+    } catch (error) {
+      console.error("Error editing comment:", error);
+    }
+  };
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const response = await axios.delete(
+        `http://localhost:8081/comment/${commentId}`,
+        {
+          data: {
+            user_id: getUserId(),
+          },
+        }
+      );
+      if (response.status === 200) {
+        fetchPosts();
+        console.log("Comment deleted successfully");
+      } else {
+        console.error("Failed to delete comment");
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+    }
+  };
+
   const InputStyle = {
     width: "100%",
     marginLeft: "70px",
@@ -344,11 +399,14 @@ const Home = ({
 
   const replyBox = {
     marginLeft: "70px",
-    width: "100%",
   };
 
   const replyPstyle = {
-    borderTop: "1px solid #000000",
+    borderTop: "1px solid #ccc",
+
+    paddingTop: "20px",
+    paddingBottom: "20px",
+    fontSize: "16px",
   };
 
   const ImageStyle = {
@@ -363,6 +421,23 @@ const Home = ({
     marginTop: "5px",
     marginLeft: "5px",
     borderRadius: "50%",
+  };
+
+  const editParent = {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  };
+
+  const replyInputStyle = {
+    marginBottom: "10px",
+  };
+
+  const replyPstyle2 = {
+    marginLeft: "10px",
+    marginBottom: "10px",
+    paddingBottom: "10px",
+    borderBottom: "1px solid #ccc",
   };
 
   return (
@@ -446,8 +521,10 @@ const Home = ({
               <IconContainer>
                 <StyledIconButton>
                   <FavoriteIconStyle
-                    onClick={() => handleLikeClick(post.id)}
-                    style={{ color: likedPosts[post.id] ? "red" : "inherit" }}
+                    onClick={() => handleFavoriteLike(post.id)}
+                    style={{
+                      color: likedPosts.includes(post.id) ? "red" : "inherit",
+                    }}
                   />
                   <CommentIconStyle
                     onClick={() => handleReplyIconClick(post.id)}
@@ -470,19 +547,35 @@ const Home = ({
               </IconContainer>
 
               {/* Render replies */}
+              {/* Render replies */}
               <ReplyBox>
                 {replyingToPost === post.id && (
                   <div style={replyBox}>
                     <div>
                       {Array.isArray(post.replies) &&
                         post.replies.map((reply, index) => (
-                          <div key={index}>
-                            <p style={replyPstyle}>{reply.text}</p>
-                            {console.log(reply.text)}
+                          <div key={index} style={editParent}>
+                            <div>
+                              <MeatBox style={replyPstyle}>
+                                <img
+                                  style={ImageStyle2}
+                                  src={`http://localhost:8081/` + data.image}
+                                  alt=""
+                                />
+
+                                <UserNiceNameContainer>
+                                  {post. username}
+                                </UserNiceNameContainer>
+                              </MeatBox>
+                              <p style={replyPstyle2}>{reply.text}</p>
+                            </div>
+                            <div></div>
                           </div>
                         ))}
                     </div>
+                    {/* Input field for editing comment */}
                     <Input
+                      style={replyInputStyle}
                       type="text"
                       value={replyText[post.id] || ""}
                       onChange={(e) =>

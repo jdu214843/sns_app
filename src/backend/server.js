@@ -100,6 +100,35 @@ app.post("/signin", (req, res) => {
   });
 });
 
+// Endpoint to fetch user profile data
+app.get("/profile/:id", async (req, res) => {
+  const userId = req.params.id;
+  try {
+    // Get a connection from the pool
+    const connection = await pool.getConnection();
+
+    // Run the query to fetch user profile data
+    const [rows] = await connection.execute(
+      "SELECT username, full_name, id, image FROM User WHERE id = ?",
+      [userId]
+    );
+
+    // Release the connection
+    connection.release();
+
+    // Check if user exists
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Send the fetched data as JSON response
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error fetching user profile data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Update Profile
 app.put("/profile", (req, res) => {
   const { user_id, full_name, username } = req.body;
@@ -177,20 +206,53 @@ app.put("/post/:id", (req, res) => {
   });
 });
 
-// Get Post
 app.post("/posts", (req, res) => {
-  const { user_id } = req.body;
   const sql =
-    "SELECT p.id,p.text,u.full_name,u.username,COALESCE(u.image, 'default.png') AS image,b.status FROM Post AS p INNER JOIN User AS u ON u.id = p.user_id LEFT JOIN Bookmark AS b ON b.post_id = p.id AND b.user_id = ? ORDER by p.id DESC";
-  db.query(sql, [user_id], (err, result) => {
+    "SELECT p.id, p.text, u.full_name, u.username, COALESCE(u.image, 'default.png') AS image, b.status AS bookmark_status, " +
+    "EXISTS(SELECT 1 FROM `Like` AS l WHERE l.post_id = p.id AND l.user_id = ?) AS like_status, " +
+    "GROUP_CONCAT(c.text) AS comments " +
+    "FROM Post AS p " +
+    "INNER JOIN User AS u ON u.id = p.user_id " +
+    "LEFT JOIN Bookmark AS b ON b.post_id = p.id AND b.user_id = ? " +
+    "LEFT JOIN Comment AS c ON c.post_id = p.id " +
+    "GROUP BY p.id, p.text, u.full_name, u.username, u.image, b.status " +
+    "ORDER BY p.id DESC";
+
+  db.query(sql, [req.body.user_id, req.body.user_id], (err, result) => {
     if (err) {
       console.error("Error signing in:", err);
       return res.status(500).json({ error: "Error signing in" });
     }
     if (result.length > 0) {
+      // Process comments and format response
+      const formattedResult = result.map((post) => {
+        const formattedPost = {
+          id: post.id,
+          text: post.text,
+          full_name: post.full_name,
+          username: post.username,
+          image: post.image,
+          bookmark_status: post.bookmark_status,
+          like_status: post.like_status,
+          replies: [], // Initialize empty array for comments
+        };
+
+        // Check if comments exist
+        if (post.comments) {
+          // Split concatenated comments into an array
+          const commentsArray = post.comments.split(",");
+          // Add each comment to the replies array
+          formattedPost.replies = commentsArray.map((comment) => ({
+            text: comment,
+          }));
+        }
+
+        return formattedPost;
+      });
+
       return res.json({
         status: "success",
-        posts: result,
+        posts: formattedResult,
       });
     } else {
       return res.status(200).json({ error: "Post not found" });
@@ -269,7 +331,7 @@ app.get("/comment/:post_id", (req, res) => {
 app.post("/like", (req, res) => {
   const { user_id, post_id, action } = req.body;
   const sql = "SELECT * FROM `Like` WHERE `post_id` = ? AND `user_id` = ?";
-  const actionStatus = action == "true" ? true : false;
+  const actionStatus = action == "true" ? false : true;
   db.query(sql, [post_id, user_id], (err, data) => {
     if (err) {
       console.error("Error signing in:", err);
@@ -340,8 +402,6 @@ app.post("/bookmark", (req, res) => {
     }
   });
 });
-
-// un bookmark
 
 // Unbookmark Post
 app.post("/unbookmark", (req, res) => {
