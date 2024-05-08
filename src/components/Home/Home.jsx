@@ -483,7 +483,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                     src={`http://localhost:8081/` + data.image}
                     alt=""
                   />
-
                   <UserNiceNameContainer>{post.username}</UserNiceNameContainer>
                 </MeatBox>
                 <div style={{ position: "relative" }}>
@@ -564,7 +563,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                                 />
 
                                 <UserNiceNameContainer>
-                                  {post. username}
+                                  {post.username}
                                 </UserNiceNameContainer>
                               </MeatBox>
                               <p style={replyPstyle2}>{reply.text}</p>

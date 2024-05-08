@@ -56,6 +56,7 @@ app.get("/", (req, res) => {
     return res.json(result);
   });
 });
+
 // Register
 app.post("/signup", (req, res) => {
   const { full_name, username, email, password } = req.body;

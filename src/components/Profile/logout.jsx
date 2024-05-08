@@ -9,7 +9,8 @@ const LogOut = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("email");
     localStorage.removeItem("password");
-    localStorage.removeItem("fullname");
+    localStorage.removeItem("full_name");
+    localStorage.removeItem("imageUrl");
     localStorage.removeItem("id");
     navigate("/");
   };
