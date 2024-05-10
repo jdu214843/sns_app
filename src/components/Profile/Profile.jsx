@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Edit } from "@mui/icons-material";
+import { Edit } from "@mui/icons-material"; // Edit ikoni uchun
+
 import { StyledIcon } from "../Style/StyledBottomNavigationAction";
 import LogOut from "./logout";
+
 import {
   ProfileTitle,
   ProfileArrow,
@@ -13,17 +15,13 @@ import {
   ProfileImgIcon,
   ProfileDescription,
   UpdateBtn,
-  EditIcon,
+  EditIcon, // Izoh: Edit ikoniga mos EditIcon komponentini import qilamiz
 } from "./style";
 
 const Profile = () => {
-  const defaultImageUrl = "../../backend/uploads/default2.png";
-
-  const [imageUrl, setImageUrl] = useState(
-    localStorage.getItem("imageUrl") || defaultImageUrl
-  );
+  const [imageUrl, setImageUrl] = useState("");
   const [file, setFile] = useState(null);
-  const [data, setData] = useState([]); // Define 'data' state
+  const [data, setData] = useState([]);
   const [email, setEmail] = useState(localStorage.getItem("email") || "");
   const [full_name, setFullname] = useState(
     localStorage.getItem("full_name") || ""
@@ -35,14 +33,24 @@ const Profile = () => {
   const [error, setError] = useState(null);
   const [isEditingFullname, setIsEditingFullname] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
+
   const [newFullname, setNewFullname] = useState(full_name);
   const [newUsername, setNewUsername] = useState(username);
+
+  const getUserId = () => {
+    return localStorage.getItem("id");
+  };
 
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get("http://localhost:8081/");
-        setData(response.data[0]);
+        const user_id = getUserId();
+
+        if (!user_id) {
+          setLoading(false);
+          return;
+        }
+
         setLoading(false);
       } catch (error) {
         console.error("Error fetching user profile:", error);
@@ -50,6 +58,7 @@ const Profile = () => {
         setLoading(false);
       }
     };
+
     fetchUserProfile();
   }, []);
 
@@ -57,17 +66,20 @@ const Profile = () => {
     setFile(event.target.files[0]);
   };
 
-  const getUserId = () => {
-    return localStorage.getItem("id");
-  };
+  useEffect(() => {
+    axios
+      .get("http://localhost:8081/")
+      .then((res) => {
+        setData(res.data[0]);
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   const handleUpload = async () => {
     try {
-      const user_id = getUserId();
-
       const formData = new FormData();
       formData.append("image", file);
-      formData.append("user_id", user_id);
+      formData.append("user_id", getUserId());
 
       const response = await axios.post(
         "http://localhost:8081/uploadImage",
@@ -80,35 +92,41 @@ const Profile = () => {
       );
 
       console.log("Image uploaded successfully:", response.data);
-      const uploadedImageUrl = data.image;
 
-      setImageUrl(uploadedImageUrl);
-      localStorage.setItem("imageUrl", uploadedImageUrl);
+      setImageUrl(response.data.imageUrl);
+      localStorage.setItem("imageUrl", response.data.imageUrl);
     } catch (error) {
       console.error("Error uploading image:", error);
     }
   };
 
   const handleUpdateProfile = () => {
-    const user_id = getUserId();
+    const user_id = getUserId(); // Get user ID
     const data = {
       full_name: newFullname,
       username: newUsername,
       user_id: user_id,
     };
+
     axios
       .put(`http://localhost:8081/profile/`, data)
       .then((response) => {
         console.log("Profile updated successfully:", response.data);
+        // Update state and UI after successful update
         setFullname(newFullname);
+
         setIsEditingFullname(false);
+
         localStorage.setItem("full_name", newFullname);
         setUsername(newUsername);
+
         setIsEditingUsername(false);
+
         localStorage.setItem("username", newUsername);
       })
       .catch((error) => {
         console.error("Error updating profile:", error);
+        // Handle error if necessary
       });
   };
 
@@ -157,9 +175,7 @@ const Profile = () => {
           <div>
             <img
               style={ImageStyle}
-              src={
-                data.image ? `http://localhost:8081/${data.image}` : imageUrl
-              }
+              src={`http://localhost:8081/` + data.image}
               alt=""
             />
           </div>
@@ -229,7 +245,7 @@ const Profile = () => {
               </div>
             </div>
           </ProfileDescription>
-          <LogOut clearImageUrl={() => setImageUrl("")} />
+          <LogOut />
           <UpdateBtn onClick={handleUpdateProfile}>Update Profile</UpdateBtn>
         </ProfileLogin>
       </ProfileLoginImg>
