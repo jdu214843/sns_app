@@ -134,7 +134,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
           const response = await axios.get(
             `http://localhost:8081/comment/${post.id}`
           );
-
+          post.replies = response.data.comments;
           return post;
         })
       );
@@ -144,13 +144,10 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
-  // Inside the useEffect hook for fetching posts
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  // Inside the fetchPosts function after setting the posts state
-  // Here we populate the likedPosts state based on the posts data
   useEffect(() => {
     const likedPostIds = posts.reduce((acc, post) => {
       if (post.liked) {
@@ -232,14 +229,12 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
   };
 
   const handleReplyIconClick = (postId, index) => {
-    if (replyingToPost === postId) {
-      // Close the reply box
+    if (replyingToPost == postId) {
       setReplyingToPost(null);
     } else {
-      // Open the reply box for the post with postId
       setReplyingToPost(postId);
     }
-    // Toggle dropdown for the post
+
     setIsDropdownOpen(isDropdownOpen === index ? null : index);
   };
 
@@ -252,10 +247,11 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
   const handleReplySubmit = async (postId) => {
     try {
+      const user_id = getUserId();
       const response = await axios.post("http://localhost:8081/comment", {
         text: replyText[postId],
         post_id: postId,
-        user_id: getUserId(),
+        user_id: user_id,
       });
 
       if (response.status === 200) {
@@ -546,7 +542,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
               </IconContainer>
 
               {/* Render replies */}
-              {/* Render replies */}
               <ReplyBox>
                 {replyingToPost === post.id && (
                   <div style={replyBox}>
@@ -563,7 +558,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                                 />
 
                                 <UserNiceNameContainer>
-                                  {post.username}
+                                  {reply.commenter_username}
                                 </UserNiceNameContainer>
                               </MeatBox>
                               <p style={replyPstyle2}>{reply.text}</p>

@@ -309,13 +309,27 @@ app.put("/comment", (req, res) => {
 });
 
 // Get Comment
+
 app.get("/comment/:post_id", (req, res) => {
-  const sql =
-    "SELECT c.id,c.text,u.full_name,u.username,COALESCE(u.image, 'default.png') AS image FROM Comment AS c INNER JOIN User AS u ON u.id = c.user_id WHERE c.post_id = ?";
+  const sql = `SELECT 
+  c.id, 
+  c.text, 
+  commenter.full_name AS commenter_full_name, 
+  commenter.username AS commenter_username, 
+  COALESCE(commenter.image, 'default.png') AS commenter_image 
+FROM 
+  Comment AS c 
+INNER JOIN 
+  User AS commenter 
+ON 
+  commenter.id = c.user_id 
+WHERE 
+  c.post_id = ?`;
+
   db.query(sql, req.params.post_id, (err, result) => {
     if (err) {
-      console.error("Error signing in:", err);
-      return res.status(500).json({ error: "Error signing in" });
+      console.error("Error fetching comments:", err);
+      return res.status(500).json({ error: "Error fetching comments" });
     }
     if (result.length > 0) {
       return res.json({
@@ -323,7 +337,7 @@ app.get("/comment/:post_id", (req, res) => {
         comments: result,
       });
     } else {
-      return res.status(200).json({ error: "Comment not found" });
+      return res.status(200).json({ error: "No comments found for this post" });
     }
   });
 });

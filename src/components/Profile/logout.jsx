@@ -2,7 +2,9 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogDiv, LogOutDiv } from "./style";
 
-const LogOut = () => {
+const defaultImageUrl = "path_to_default_image"; // Set your default image path here
+
+const LogOut = ({ clearImageUrl }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -10,8 +12,11 @@ const LogOut = () => {
     localStorage.removeItem("email");
     localStorage.removeItem("password");
     localStorage.removeItem("full_name");
-    localStorage.removeItem("imageUrl");
     localStorage.removeItem("id");
+    if (localStorage.getItem("imageUrl")) {
+      localStorage.removeItem("imageUrl");
+      clearImageUrl(); // Clear the imageUrl state in the Profile component
+    }
     navigate("/");
   };
 
