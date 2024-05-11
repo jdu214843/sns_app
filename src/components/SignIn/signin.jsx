@@ -81,7 +81,7 @@ const SignIn = ({ onSignIn }) => {
               type="password"
               placeholder="Enter password"
               name="password"
-              value={values.password}
+              value={values.password} 
               onChange={handleInput}
             />
             {errors.password && <span>{errors.password}</span>}

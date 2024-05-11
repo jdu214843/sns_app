@@ -47,13 +47,34 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
   };
 
   useEffect(() => {
+    const storedID = localStorage.getItem("id");
+
     axios
-      .get("http://localhost:8081/")
-      .then((res) => {
-        setData(res.data[0]);
+      .get(`http://localhost:8081/getUserData/`, {
+        params: {
+          id: storedID,
+        },
       })
-      .catch((err) => console.log(err));
+      .then((res) => {
+        console.log("Response from server:", res.data);
+        if (storedID && res.data) {
+          setData(res.data);
+
+          fetchUserImage(storedID);
+        }
+      })
+      .catch((err) => console.log("Error fetching user data:", err));
   }, []);
+
+  const fetchUserImage = (userId) => {
+    axios
+      .get(`http://localhost:8081/getUserImage/${userId}`)
+      .then((res) => {
+        console.log("Response from image server:", res.data);
+        setImageURL(res.data.imageUrl);
+      })
+      .catch((err) => console.log("Error fetching user image:", err));
+  };
 
   const getUserId = () => {
     return localStorage.getItem("id");
@@ -97,7 +118,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
         });
 
         if (response.status === 200) {
-          // Post creation successful
           const newPost = {
             id: response.data.post_id,
             text: newPostText,
@@ -106,10 +126,8 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
           setPosts([...posts, newPost]);
 
-          // Clear the post text
           setPostText("");
         } else {
-          // Post creation failed
           console.error("Error creating post");
         }
       } catch (error) {
@@ -443,7 +461,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
           <div>
             <img
               style={ImageStyle}
-              src={`http://localhost:8081/` + data.image}
+              src={`http://localhost:8081/getUserImage/${data.id}`}
               alt=""
             />
           </div>
@@ -476,7 +494,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                 <MeatBox>
                   <img
                     style={ImageStyle2}
-                    src={`http://localhost:8081/` + data.image}
+                    src={`http://localhost:8081/getUserImage/${post.user_id}`} // Foydalanuvchi ID'si bilan URL yaratish
                     alt=""
                   />
                   <UserNiceNameContainer>{post.username}</UserNiceNameContainer>

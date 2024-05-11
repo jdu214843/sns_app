@@ -33,6 +33,7 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
   if (!req.file) {
     return res.status(400).send("No files were uploaded.");
   }
+
   const image = req.file.filename;
   const { user_id } = req.body;
 
@@ -49,11 +50,36 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
   });
 });
 // get image
-app.get("/", (req, res) => {
-  const sql = "SELECT * FROM User";
-  db.query(sql, (err, result) => {
-    if (err) return res.json({ error: " error" });
-    return res.json(result);
+
+app.get("/getUserImage/:id", (req, res) => {
+  const userId = req.params.id;
+  const sql = "SELECT image FROM User WHERE id = ?";
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error("Error fetching user image from database:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const imageUrl = result[0].image;
+    return res.status(200).json({ imageUrl });
+  });
+});
+
+app.get("/getUserData", (req, res) => {
+  const userId = req.query.id;
+  const sql = "SELECT * FROM User WHERE id = ?";
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.error("Error fetching user data from database:", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+    if (result.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    const userData = result[0];
+    return res.status(200).json(userData);
   });
 });
 

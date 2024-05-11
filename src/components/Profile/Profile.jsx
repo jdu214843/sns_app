@@ -19,7 +19,6 @@ import {
 } from "./style";
 
 const Profile = () => {
-  const [imageUrl, setImageUrl] = useState("");
   const [file, setFile] = useState(null);
   const [data, setData] = useState([]);
   const [email, setEmail] = useState(localStorage.getItem("email") || "");
@@ -35,6 +34,7 @@ const Profile = () => {
   const [isEditingUsername, setIsEditingUsername] = useState(false);
 
   const [newFullname, setNewFullname] = useState(full_name);
+  const [imageUrl, setImageUrl] = useState("");
   const [newUsername, setNewUsername] = useState(username);
 
   const getUserId = () => {
@@ -67,13 +67,34 @@ const Profile = () => {
   };
 
   useEffect(() => {
+    const storedID = localStorage.getItem("id");
+
     axios
-      .get("http://localhost:8081/")
-      .then((res) => {
-        setData(res.data[0]);
+      .get(`http://localhost:8081/getUserData/`, {
+        params: {
+          id: storedID,
+        },
       })
-      .catch((err) => console.log(err));
+      .then((res) => {
+        console.log("Response from server:", res.data);
+        if (storedID && res.data) {
+          setData(res.data);
+
+          fetchUserImage(storedID);
+        }
+      })
+      .catch((err) => console.log("Error fetching user data:", err));
   }, []);
+
+  const fetchUserImage = (userId) => {
+    axios
+      .get(`http://localhost:8081/getUserImage/${userId}`)
+      .then((res) => {
+        console.log("Response from image server:", res.data);
+        setImageURL(res.data.imageUrl);
+      })
+      .catch((err) => console.log("Error fetching user image:", err));
+  };
 
   const handleUpload = async () => {
     try {
@@ -173,11 +194,14 @@ const Profile = () => {
           {imageUrl && <img style={ImageStyle} src={imageUrl} alt="Profile" />}
           <input type="file" onChange={handleFileChange} />
           <div>
-            <img
-              style={ImageStyle}
-              src={`http://localhost:8081/` + data.image}
-              alt=""
-            />
+            {/* Check if data.image exists before rendering */}
+            {data.image && (
+              <img
+                style={ImageStyle}
+                src={`http://localhost:8081/` + data.image}
+                alt="Profile"
+              />
+            )}
           </div>
           <button
             style={{ width: "100px", padding: "5px" }}
