@@ -33,6 +33,8 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
   const [replyingToPost, setReplyingToPost] = useState(null);
   const [posts, setPosts] = useState([]);
   const [data, setData] = useState([]);
+  const [imageURL, setImageURL] = useState("");
+  const [userImage, setUserImage] = useState("");
 
   const maxLength = 140;
 
@@ -44,6 +46,10 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
   const toggleDropdown = (index) => {
     setIsDropdownOpen(isDropdownOpen === index ? null : index);
+  };
+
+  const getUserId = () => {
+    return localStorage.getItem("id");
   };
 
   useEffect(() => {
@@ -59,26 +65,20 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
         console.log("Response from server:", res.data);
         if (storedID && res.data) {
           setData(res.data);
-
-          fetchUserImage(storedID);
         }
       })
       .catch((err) => console.log("Error fetching user data:", err));
   }, []);
 
-  const fetchUserImage = (userId) => {
-    axios
-      .get(`http://localhost:8081/getUserImage/${userId}`)
-      .then((res) => {
-        console.log("Response from image server:", res.data);
-        setImageURL(res.data.imageUrl);
-      })
-      .catch((err) => console.log("Error fetching user image:", err));
-  };
-
-  const getUserId = () => {
-    return localStorage.getItem("id");
-  };
+  // const fetchUserImage = (userId) => {
+  //   axios
+  //     .get(`http://localhost:8081/getUserImage/${userId}`)
+  //     .then((res) => {
+  //       console.log("Response from image server:", res.data);
+  //       setImageUrl(res.data.imageUrl); // Set the image URL in state
+  //     })
+  //     .catch((err) => console.log("Error fetching user image:", err));
+  // };
 
   const [username, setUsername] = useState(
     localStorage.getItem("username") || ""
@@ -87,7 +87,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     const currentPostText = postText;
 
     if (currentPostIndex !== null) {
-      // If currentPostIndex is not null, it means we're editing an existing post
       try {
         const user_id = getUserId();
         const postIdToUpdate = posts[currentPostIndex].id;
@@ -136,8 +135,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
-  // Fetch all posts
-
   useEffect(() => {
     fetchPosts();
   }, []);
@@ -161,10 +158,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
       console.error("Error fetching posts:", error);
     }
   };
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
 
   useEffect(() => {
     const likedPostIds = posts.reduce((acc, post) => {
@@ -339,49 +332,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
-  // Inside the Home component
-
-  const handleEditComment = async (commentId, newText) => {
-    try {
-      const user_id = getUserId();
-      const response = await axios.put("http://localhost:8081/comment", {
-        user_id: user_id,
-        comment_id: commentId,
-        text: newText,
-      });
-
-      if (response.status === 200) {
-        // Update the UI or fetch the posts again to reflect changes
-        fetchPosts();
-        console.log("Comment updated successfully");
-      } else {
-        console.error("Failed to edit comment");
-      }
-    } catch (error) {
-      console.error("Error editing comment:", error);
-    }
-  };
-  const handleDeleteComment = async (commentId) => {
-    try {
-      const response = await axios.delete(
-        `http://localhost:8081/comment/${commentId}`,
-        {
-          data: {
-            user_id: getUserId(),
-          },
-        }
-      );
-      if (response.status === 200) {
-        fetchPosts();
-        console.log("Comment deleted successfully");
-      } else {
-        console.error("Failed to delete comment");
-      }
-    } catch (error) {
-      console.error("Error deleting comment:", error);
-    }
-  };
-
   const InputStyle = {
     width: "100%",
     marginLeft: "70px",
@@ -459,11 +409,13 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
       <HomePost>
         <UserIcon>
           <div>
-            <img
-              style={ImageStyle}
-              src={`http://localhost:8081/getUserImage/${data.id}`}
-              alt=""
-            />
+            {data.image && (
+              <img
+                style={ImageStyle2}
+                src={`http://localhost:8081/` + data.image}
+                alt="Profile"
+              />
+            )}
           </div>
         </UserIcon>
         <Input
@@ -492,11 +444,13 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
             <PostText key={index}>
               <PostUserContainer>
                 <MeatBox>
-                  <img
-                    style={ImageStyle2}
-                    src={`http://localhost:8081/getUserImage/${post.user_id}`} // Foydalanuvchi ID'si bilan URL yaratish
-                    alt=""
-                  />
+                  {data.image && (
+                    <img
+                      style={ImageStyle2}
+                      src={`http://localhost:8081/` + post.image}
+                      alt="Profile"
+                    />
+                  )}
                   <UserNiceNameContainer>{post.username}</UserNiceNameContainer>
                 </MeatBox>
                 <div style={{ position: "relative" }}>
@@ -569,11 +523,16 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                           <div key={index} style={editParent}>
                             <div>
                               <MeatBox style={replyPstyle}>
-                                <img
-                                  style={ImageStyle2}
-                                  src={`http://localhost:8081/` + data.image}
-                                  alt=""
-                                />
+                                {data.image && (
+                                  <img
+                                    style={ImageStyle2}
+                                    src={
+                                      `http://localhost:8081/` +
+                                      reply.commenter_image
+                                    }
+                                    alt="Profile"
+                                  />
+                                )}
 
                                 <UserNiceNameContainer>
                                   {reply.commenter_username}

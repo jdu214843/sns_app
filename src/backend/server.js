@@ -22,12 +22,13 @@ const storage = multer.diskStorage({
     cb(null, "uploads/");
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    // Ensure unique filenames to prevent overwriting
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage: storage });
-
 // Upload Image
 app.post("/uploadImage", upload.single("image"), (req, res) => {
   if (!req.file) {
@@ -51,7 +52,8 @@ app.post("/uploadImage", upload.single("image"), (req, res) => {
 });
 // get image
 
-app.get("/getUserImage/:id", (req, res) => {
+// First route
+app.get("/getUserImage/:userId", (req, res) => {
   const userId = req.params.id;
   const sql = "SELECT image FROM User WHERE id = ?";
   db.query(sql, [userId], (err, result) => {
@@ -66,6 +68,8 @@ app.get("/getUserImage/:id", (req, res) => {
     return res.status(200).json({ imageUrl });
   });
 });
+
+// Second route
 
 app.get("/getUserData", (req, res) => {
   const userId = req.query.id;
@@ -244,7 +248,6 @@ app.post("/posts", (req, res) => {
     "LEFT JOIN Comment AS c ON c.post_id = p.id " +
     "GROUP BY p.id, p.text, u.full_name, u.username, u.image, b.status " +
     "ORDER BY p.id DESC";
-
   db.query(sql, [req.body.user_id, req.body.user_id], (err, result) => {
     if (err) {
       console.error("Error signing in:", err);
@@ -462,10 +465,10 @@ app.post("/unbookmark", (req, res) => {
 app.post("/myBookmark", (req, res) => {
   const { user_id } = req.body;
   const sql = `SELECT p.id,p.text,u.full_name,u.username,COALESCE(u.image, 'default.png') AS image 
-                        FROM Bookmark AS b
-                        INNER JOIN Post AS p ON b.post_id = p.id
-                        INNER JOIN User AS u ON u.id = p.user_id
-                        WHERE b.user_id = ? ORDER by p.id DESC`;
+  FROM Bookmark AS b
+  INNER JOIN Post AS p ON b.post_id = p.id
+  INNER JOIN User AS u ON u.id = p.user_id
+  WHERE b.user_id = ? ORDER by p.id DESC`;
   db.query(sql, [user_id], (err, result) => {
     if (err) {
       console.error("Error signing in:", err);

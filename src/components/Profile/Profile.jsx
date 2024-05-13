@@ -35,6 +35,7 @@ const Profile = () => {
 
   const [newFullname, setNewFullname] = useState(full_name);
   const [imageUrl, setImageUrl] = useState("");
+
   const [newUsername, setNewUsername] = useState(username);
 
   const getUserId = () => {
@@ -91,7 +92,7 @@ const Profile = () => {
       .get(`http://localhost:8081/getUserImage/${userId}`)
       .then((res) => {
         console.log("Response from image server:", res.data);
-        setImageURL(res.data.imageUrl);
+        setImageUrl(res.data.imageUrl); // Set the image URL in state
       })
       .catch((err) => console.log("Error fetching user image:", err));
   };
@@ -191,7 +192,6 @@ const Profile = () => {
       </ProfileTitle>
       <ProfileLoginImg>
         <ProfileImgIcon>
-          {imageUrl && <img style={ImageStyle} src={imageUrl} alt="Profile" />}
           <input type="file" onChange={handleFileChange} />
           <div>
             {/* Check if data.image exists before rendering */}
