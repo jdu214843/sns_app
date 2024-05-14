@@ -21,15 +21,6 @@ const Bookmark = () => {
     return localStorage.getItem("id");
   };
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:8081/")
-      .then((res) => {
-        setData(res.data[0]);
-      })
-      .catch((err) => console.log(err));
-  }, []);
-
   // Function to fetch bookmarks from the server
   const fetchBookmarks = async () => {
     try {
@@ -46,6 +37,24 @@ const Bookmark = () => {
       console.error("Error fetching bookmarks:", error);
     }
   };
+
+  useEffect(() => {
+    const storedID = localStorage.getItem("id");
+
+    axios
+      .get(`http://localhost:8081/getUserData/`, {
+        params: {
+          id: storedID,
+        },
+      })
+      .then((res) => {
+        console.log("Response from server:", res.data);
+        if (storedID && res.data) {
+          setData(res.data);
+        }
+      })
+      .catch((err) => console.log("Error fetching user data:", err));
+  }, []);
 
   // unbookmarks
   const handleUnbookmark = async (postId) => {
@@ -101,13 +110,13 @@ const Bookmark = () => {
             <PostUserContainer>
               <MetBookmark>
                 <UserNiceParent>
-                  <div>
+                  {data.image && (
                     <img
                       style={ImageStyle2}
-                      src={`http://localhost:8081/` + data.image}
-                      alt=""
+                      src={`http://localhost:8081/` + bookmark.image}
+                      alt="Profile"
                     />
-                  </div>
+                  )}
 
                   <UserNiceNameContainer>
                     {bookmark.username}

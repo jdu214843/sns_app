@@ -184,6 +184,8 @@ const Profile = () => {
     setIsEditingUsername(true);
   };
 
+  const defaultImageSrc = "./default2.jpg";
+
   return (
     <ProfileBox>
       <ProfileTitle>
@@ -195,11 +197,17 @@ const Profile = () => {
           <input type="file" onChange={handleFileChange} />
           <div>
             {/* Check if data.image exists before rendering */}
-            {data.image && (
+            {data.image ? (
               <img
                 style={ImageStyle}
-                src={`http://localhost:8081/` + data.image}
+                src={`http://localhost:8081/${data.image}`}
                 alt="Profile"
+              />
+            ) : (
+              <img
+                style={ImageStyle}
+                src={defaultImageSrc}
+                alt="Default Profile"
               />
             )}
           </div>

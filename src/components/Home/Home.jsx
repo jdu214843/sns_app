@@ -70,16 +70,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
       .catch((err) => console.log("Error fetching user data:", err));
   }, []);
 
-  // const fetchUserImage = (userId) => {
-  //   axios
-  //     .get(`http://localhost:8081/getUserImage/${userId}`)
-  //     .then((res) => {
-  //       console.log("Response from image server:", res.data);
-  //       setImageUrl(res.data.imageUrl); // Set the image URL in state
-  //     })
-  //     .catch((err) => console.log("Error fetching user image:", err));
-  // };
-
   const [username, setUsername] = useState(
     localStorage.getItem("username") || ""
   );
@@ -411,7 +401,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
           <div>
             {data.image && (
               <img
-                style={ImageStyle2}
+                style={ImageStyle}
                 src={`http://localhost:8081/` + data.image}
                 alt="Profile"
               />

@@ -88,12 +88,17 @@ app.get("/getUserData", (req, res) => {
 });
 
 // Register
+const defaultImageSrc = "default2.jpg"; // Assuming default2.jpg is in the same directory as this file
+
 app.post("/signup", (req, res) => {
   const { full_name, username, email, password } = req.body;
 
+  // Set the default image if the image field is not provided in the request
+  const image = req.body.image ? req.body.image : defaultImageSrc;
+
   const sql =
-    "INSERT INTO User (`full_name`, `username`, `email`, `password`) VALUES (?, ?, ?, ?)";
-  const values = [full_name, username, email, password];
+    "INSERT INTO User (`full_name`, `username`, `email`, `password`, `image`) VALUES (?, ?, ?, ?, ?)";
+  const values = [full_name, username, email, password, image];
 
   db.query(sql, values, (err, result) => {
     if (err) {
@@ -122,7 +127,7 @@ app.post("/signin", (req, res) => {
           username,
           full_name,
           email,
-          image: image ? image : "default.png",
+          image: image ? image : "default2.jpg",
         },
       });
     } else {
