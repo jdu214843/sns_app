@@ -26,15 +26,12 @@ import {
 const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
   const [postText, setPostText] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(null);
-  const [replies, setReplies] = useState([]);
-  const [likedPosts, setLikedPosts] = useState([]);
   const [currentPostIndex, setCurrentPostIndex] = useState(null);
   const [replyText, setReplyText] = useState({});
   const [replyingToPost, setReplyingToPost] = useState(null);
   const [posts, setPosts] = useState([]);
   const [data, setData] = useState([]);
-  const [imageURL, setImageURL] = useState("");
-  const [userImage, setUserImage] = useState("");
+  const [likedPosts, setLikedPosts] = useState([]);
 
   const maxLength = 140;
 
@@ -44,8 +41,14 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
-  const toggleDropdown = (index) => {
-    setIsDropdownOpen(isDropdownOpen === index ? null : index);
+  const toggleDropdown = (postId) => {
+    const storedUsername = localStorage.getItem("username");
+
+    const post = posts.find((post) => post.id === postId);
+
+    if (post && storedUsername === post.username) {
+      setIsDropdownOpen(isDropdownOpen === postId ? null : postId);
+    }
   };
 
   const getUserId = () => {
@@ -149,6 +152,48 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
+  // Inside the handleFavoriteLike function
+
+  const handleFavoriteLike = async (postId, action) => {
+    try {
+      const actionStatus = action === "true" ? false : true;
+
+      const user_id = getUserId();
+      const response = await axios.post("http://localhost:8081/like", {
+        user_id: user_id,
+        post_id: postId,
+        action: actionStatus,
+      });
+
+      if (response.status === 200) {
+        // Update likedPosts state based on the postId
+        setLikedPosts((prevLikedPosts) => {
+          if (prevLikedPosts.includes(postId)) {
+            return prevLikedPosts.filter((id) => id !== postId); // If the post is already liked, remove it from the likedPosts
+          } else {
+            return [...prevLikedPosts, postId]; // If the post is not liked, add it to the likedPosts
+          }
+        });
+      } else {
+        console.log(
+          "Server returned an unexpected status code:",
+          response.status
+        );
+        // Handle other response statuses if needed
+        if (response.status === 400) {
+          // Handle bad request
+        } else if (response.status === 401) {
+          // Handle unauthorized access
+        } else {
+          // Handle other status codes
+        }
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      // Handle error more gracefully if needed
+    }
+  };
+
   useEffect(() => {
     const likedPostIds = posts.reduce((acc, post) => {
       if (post.liked) {
@@ -159,45 +204,60 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     setLikedPosts(likedPostIds);
   }, [posts]);
 
-  // Inside the handleFavoriteLike function
-  const handleFavoriteLike = async (postId) => {
+  // Function to handle clicking the bookmark icon
+  const handleBookmarkClick = async (postId) => {
     try {
       const user_id = getUserId();
-      let action = true; // Default action is liking
+      const action = !bookmarkedPosts[postId]; // Toggle bookmark status
 
-      // Check if the post is already liked by the user
-      if (likedPosts.includes(postId)) {
-        // If the post is already liked, then this click will be for disliking
-        action = false;
-      }
-
-      const response = await axios.post("http://localhost:8081/like", {
+      const response = await axios.post("http://localhost:8081/bookmark", {
         user_id: user_id,
         post_id: postId,
         action: action,
       });
 
       if (response.status === 200) {
-        console.log(`${action ? "Liked" : "Disliked"} successfully`);
-        // Update the likedPosts state based on the action
-        if (action) {
-          // If the action is liking, add the postId to likedPosts
-          setLikedPosts((prevLikedPosts) => [...prevLikedPosts, postId]);
-        } else {
-          // If the action is disliking, remove the postId from likedPosts
-          setLikedPosts((prevLikedPosts) =>
-            prevLikedPosts.filter((id) => id !== postId)
-          );
-        }
+        setBookmarkedPosts((prevBookmarkedPosts) => ({
+          ...prevBookmarkedPosts,
+          [postId]: action,
+        }));
+        console.log(
+          `Post ${postId} ${
+            action ? "bookmarked" : "unbookmarked"
+          } successfully`
+        );
       } else {
-        console.error(`Failed to ${action ? "like" : "dislike"}`);
-        // Handle the failure case appropriately
+        // Handle other response statuses, if needed
+        console.error("Failed to toggle bookmark: Unexpected status code");
       }
     } catch (error) {
-      console.error(`Error ${action ? "liking" : "disliking"} post:`, error);
-      // Handle errors such as network issues or server errors
+      console.error("Error toggling bookmark:", error);
     }
   };
+
+  const handleUnbookmark = async (postId) => {
+    try {
+      const user_id = getUserId();
+      const response = await axios.post("http://localhost:8081/unbookmark", {
+        user_id: user_id,
+        post_id: postId,
+        action: false,
+      });
+      if (response.status === 200) {
+        setBookmarkedPosts((prevBookmarkedPosts) => {
+          const updatedBookmarkedPosts = { ...prevBookmarkedPosts };
+          delete updatedBookmarkedPosts[postId];
+          return updatedBookmarkedPosts;
+        });
+        console.log("Post unbookmarked successfully");
+      } else {
+        console.error("Failed to unbookmark post: Unexpected status code");
+      }
+    } catch (error) {
+      console.error("Error unbookmarking post:", error);
+    }
+  };
+
   // Function placeholders
   const handleEditClick = (postId) => {
     // Find the index of the post in the array
@@ -264,61 +324,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
       }
     } catch (error) {
       console.error("Error adding reply:", error);
-    }
-  };
-
-  // Function to handle clicking the bookmark icon
-  const handleBookmarkClick = async (postId) => {
-    try {
-      const user_id = getUserId();
-      const action = !bookmarkedPosts[postId]; // Toggle bookmark status
-
-      const response = await axios.post("http://localhost:8081/bookmark", {
-        user_id: user_id,
-        post_id: postId,
-        action: action,
-      });
-
-      if (response.status === 200) {
-        setBookmarkedPosts((prevBookmarkedPosts) => ({
-          ...prevBookmarkedPosts,
-          [postId]: action,
-        }));
-        console.log(
-          `Post ${postId} ${
-            action ? "bookmarked" : "unbookmarked"
-          } successfully`
-        );
-      } else {
-        // Handle other response statuses, if needed
-        console.error("Failed to toggle bookmark: Unexpected status code");
-      }
-    } catch (error) {
-      console.error("Error toggling bookmark:", error);
-    }
-  };
-
-  const handleUnbookmark = async (postId) => {
-    try {
-      const user_id = getUserId();
-      const response = await axios.post("http://localhost:8081/unbookmark", {
-        user_id: user_id,
-        post_id: postId,
-        action: false, // Assuming you want to unbookmark the post
-      });
-      if (response.status === 200) {
-        // Update local state to remove the unbookmarked post
-        setBookmarkedPosts((prevBookmarkedPosts) => {
-          const updatedBookmarkedPosts = { ...prevBookmarkedPosts };
-          delete updatedBookmarkedPosts[postId]; // Remove the post from bookmarked posts
-          return updatedBookmarkedPosts;
-        });
-        console.log("Post unbookmarked successfully");
-      } else {
-        console.error("Failed to unbookmark post: Unexpected status code");
-      }
-    } catch (error) {
-      console.error("Error unbookmarking post:", error);
     }
   };
 
@@ -483,6 +488,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                       color: likedPosts.includes(post.id) ? "red" : "inherit",
                     }}
                   />
+
                   <CommentIconStyle
                     onClick={() => handleReplyIconClick(post.id)}
                     style={{
@@ -499,6 +505,8 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                   }
                   style={{
                     color: bookmarkedPosts[post.id] ? "blue" : "inherit",
+                    display:
+                      bookmarkedPosts[post.id] === null ? "blue" : "inherit", // Hide the icon if post is not bookmarked or deleted
                   }}
                 />
               </IconContainer>

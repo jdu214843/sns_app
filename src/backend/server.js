@@ -379,35 +379,39 @@ WHERE
 // Set Like
 app.post("/like", (req, res) => {
   const { user_id, post_id, action } = req.body;
+
+  // Convert action to boolean
+  const actionStatus = action;
+
   const sql = "SELECT * FROM `Like` WHERE `post_id` = ? AND `user_id` = ?";
-  const actionStatus = action == "true" ? false : true;
+
   db.query(sql, [post_id, user_id], (err, data) => {
     if (err) {
-      console.error("Error signing in:", err);
-      return res.status(500).json({ error: "Error signing in" });
+      console.error("Error checking like status:", err);
+      return res.status(500).json({ error: "Internal server error" });
     }
     if (data.length > 0) {
-      const sql =
+      const updateSql =
         "UPDATE `Like` SET status = ? WHERE post_id = ? AND user_id = ?";
-      db.query(sql, [actionStatus, post_id, user_id], (err, data) => {
+      db.query(updateSql, [actionStatus, post_id, user_id], (err, data) => {
         if (err) {
-          console.error("Error Like:", err);
+          console.error("Error updating like status:", err);
           return res.status(500).json({ error: "Internal server error" });
         }
         return res.status(200).json({
-          message: "Liked successfully",
+          message: "Like status updated successfully",
         });
       });
     } else {
-      const sql =
-        "INSERT INTO `Like` (user_id, post_id,status) VALUES (?, ?, ?)";
-      db.query(sql, [user_id, post_id, actionStatus], (err, data) => {
+      const insertSql =
+        "INSERT INTO `Like` (user_id, post_id, status) VALUES (?, ?, ?)";
+      db.query(insertSql, [user_id, post_id, actionStatus], (err, data) => {
         if (err) {
-          console.error("Error Like:", err);
+          console.error("Error inserting like status:", err);
           return res.status(500).json({ error: "Internal server error" });
         }
         return res.status(200).json({
-          message: "Liked successfully",
+          message: "Like status inserted successfully",
         });
       });
     }
