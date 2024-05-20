@@ -7,17 +7,11 @@ import {
   useLocation,
 } from "react-router-dom";
 
-import {
-  Home,
-  Bookmark,
-  Massages,
-  Profile,
-  Container,
-} from "./components/index";
+import { Home, Bookmark, Profile, Container } from "./components/index";
 
 import HomeIcon from "@mui/icons-material/Home";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
-import MessageIcon from "@mui/icons-material/Message";
+
 import PersonIcon from "@mui/icons-material/Person";
 import {
   BottomNavigationParent,
@@ -47,16 +41,6 @@ const NavigationBar = () => {
           }
           component={Link}
           to="/home"
-        />
-
-        <StyledBottomNavigationAction
-          icon={
-            <StyledIcon>
-              <MessageIcon />
-            </StyledIcon>
-          }
-          component={Link}
-          to="/messages"
         />
 
         <StyledBottomNavigationAction
@@ -104,7 +88,7 @@ const App = () => {
               />
             }
           />
-          <Route path="/messages" element={<Massages />} />
+
           <Route
             path="/bookmark"
             element={
@@ -114,9 +98,7 @@ const App = () => {
               />
             }
           />
-          <Route path="/profile" element={<Profile />} 
-          
-          />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
 
         <NavigationBar />

@@ -32,6 +32,8 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
   const [posts, setPosts] = useState([]);
   const [data, setData] = useState([]);
   const [likedPosts, setLikedPosts] = useState([]);
+  const storedUsername = localStorage.getItem("username");
+  const [replys, setReplys] = useState([]);
 
   const maxLength = 140;
 
@@ -46,9 +48,12 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
     const post = posts.find((post) => post.id === postId);
 
-    if (post && storedUsername === post.username) {
-      setIsDropdownOpen(isDropdownOpen === postId ? null : postId);
+    if (!post || storedUsername !== post.username) {
+      // Do not perform any action if the post doesn't exist or if the stored username doesn't match the post's username.
+      return;
     }
+
+    setIsDropdownOpen(isDropdownOpen === postId ? null : postId);
   };
 
   const getUserId = () => {
@@ -258,18 +263,18 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
-  // Function placeholders
+  // Function to handle editing a post
   const handleEditClick = (postId) => {
-    // Find the index of the post in the array
     const index = posts.findIndex((post) => post.id === postId);
-    // Get the post text
+
     const postText = posts[index].text;
-    // Set the post text in the input field for editing
+
     setPostText(postText);
-    // Set the current post index for tracking which post is being edited
+
     setCurrentPostIndex(index);
   };
 
+  // Function to handle deleting a post
   const handleDeleteClick = async (postId) => {
     try {
       const response = await axios.delete(
@@ -289,8 +294,9 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
+  // Function to handle clicking the reply icon
   const handleReplyIconClick = (postId, index) => {
-    if (replyingToPost == postId) {
+    if (replyingToPost === postId) {
       setReplyingToPost(null);
     } else {
       setReplyingToPost(postId);
@@ -299,6 +305,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     setIsDropdownOpen(isDropdownOpen === index ? null : index);
   };
 
+  // Function to handle changing reply text
   const handleReplyTextChange = (postId, text) => {
     setReplyText((prevReplyText) => ({
       ...prevReplyText,
@@ -306,24 +313,51 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }));
   };
 
+  const handleEditReply = () => {};
+
+  // Function to submit a reply
   const handleReplySubmit = async (postId) => {
     try {
       const user_id = getUserId();
-      const response = await axios.post("http://localhost:8081/comment", {
-        text: replyText[postId],
-        post_id: postId,
-        user_id: user_id,
-      });
+      const replyContent = replyText[postId];
+      const isNewComment = !(postId in replys); // Check if postId is not in replys state, indicating it's a new comment
 
-      if (response.status === 200) {
-        fetchPosts(); // Call the fetchPosts function to update the list of posts
-        setReplyText({ ...replyText, [postId]: "" }); // Clear the reply text input for the specific post
-        setReplyingToPost(null); // Reset the replyingToPost state to null
-      } else {
-        console.error("Failed to add reply");
+      if (isNewComment) {
+        // Creating a new comment
+        const response = await axios.post("http://localhost:8081/comment", {
+          text: replyContent,
+          post_id: postId,
+          user_id: user_id,
+        });
+
+        if (response.status === 200) {
+          fetchPosts(); // Update the list of posts
+          setReplyText({ ...replyText, [postId]: "" }); // Clear the reply text input
+          setReplyingToPost(null); // Reset the replyingToPost state
+        } else {
+          console.error("Failed to add reply");
+        }
       }
     } catch (error) {
-      console.error("Error adding reply:", error);
+      console.error("Error submitting reply:", error);
+    }
+  };
+
+  // Function to handle deleting a reply
+  const handleDeleteReply = async (commentId) => {
+    try {
+      const user_id = getUserId();
+      const response = await axios.delete("http://localhost:8081/comment", {
+        data: { comment_id: commentId, user_id: user_id },
+      });
+      if (response.status === 200) {
+        fetchPosts();
+        console.log("Reply deleted successfully");
+      } else {
+        console.error("Failed to delete reply");
+      }
+    } catch (error) {
+      console.error("Error deleting reply:", error);
     }
   };
 
@@ -362,7 +396,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
 
   const replyPstyle = {
     borderTop: "1px solid #ccc",
-
     paddingTop: "20px",
     paddingBottom: "20px",
     fontSize: "16px",
@@ -432,7 +465,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
           {currentPostIndex !== null ? "Update" : "Post"}
         </Button>
       </HomePost>
-
       <PostContainer>
         {posts &&
           posts.map((post, index) => (
@@ -449,9 +481,11 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                   <UserNiceNameContainer>{post.username}</UserNiceNameContainer>
                 </MeatBox>
                 <div style={{ position: "relative" }}>
-                  <HorizontalMeatballIcon
-                    onClick={() => toggleDropdown(post.id)}
-                  />
+                  {storedUsername === post.username && ( // Check if the stored username matches the post's username
+                    <HorizontalMeatballIcon
+                      onClick={() => toggleDropdown(post.id)}
+                    />
+                  )}
                   {isDropdownOpen === post.id && (
                     <CrudBtn
                       id={`CrudElementBtn-${post.id}`}
@@ -506,7 +540,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                   style={{
                     color: bookmarkedPosts[post.id] ? "blue" : "inherit",
                     display:
-                      bookmarkedPosts[post.id] === null ? "blue" : "inherit", // Hide the icon if post is not bookmarked or deleted
+                      bookmarkedPosts[post.id] === null ? "blue" : "inherit",
                   }}
                 />
               </IconContainer>
@@ -524,37 +558,47 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                                 {data.image && (
                                   <img
                                     style={ImageStyle2}
-                                    src={
-                                      `http://localhost:8081/` +
-                                      reply.commenter_image
-                                    }
+                                    src={`http://localhost:8081/${reply.commenter_image}`}
                                     alt="Profile"
                                   />
                                 )}
-
                                 <UserNiceNameContainer>
                                   {reply.commenter_username}
                                 </UserNiceNameContainer>
+                                <div>
+                                  <>
+                                    <button onClick={() => handleEditReply()}>
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleDeleteReply(reply.id)
+                                      }
+                                    >
+                                      Delete
+                                    </button>
+                                  </>
+                                </div>
                               </MeatBox>
                               <p style={replyPstyle2}>{reply.text}</p>
                             </div>
-                            <div></div>
                           </div>
                         ))}
                     </div>
-                    {/* Input field for editing comment */}
-                    <Input
-                      style={replyInputStyle}
-                      type="text"
-                      value={replyText[post.id] || ""}
-                      onChange={(e) =>
-                        handleReplyTextChange(post.id, e.target.value)
-                      }
-                      placeholder="Write a reply..."
-                    />
-                    <Button onClick={() => handleReplySubmit(post.id)}>
-                      Reply
-                    </Button>
+                    <div>
+                      <Input
+                        style={replyInputStyle}
+                        type="text"
+                        value={replyText[post.id] || ""}
+                        onChange={(e) =>
+                          handleReplyTextChange(post.id, e.target.value)
+                        }
+                        placeholder="Write a reply..."
+                      />
+                      <Button onClick={() => handleReplySubmit(post.id)}>
+                        Reply
+                      </Button>
+                    </div>
                   </div>
                 )}
               </ReplyBox>

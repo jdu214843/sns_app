@@ -15,7 +15,6 @@ const LogOut = ({ clearImageUrl }) => {
     localStorage.removeItem("id");
     if (localStorage.getItem("imageUrl")) {
       localStorage.removeItem("imageUrl");
-      clearImageUrl(); // Clear the imageUrl state in the Profile component
     }
     navigate("/");
   };
