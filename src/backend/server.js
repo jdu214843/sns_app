@@ -329,13 +329,16 @@ app.delete("/comment", (req, res) => {
 app.put("/comment", (req, res) => {
   const { user_id, comment_id, text } = req.body;
 
+  console.log("Received update request:", req.body);
+
   const sql = "UPDATE Comment SET text = ? WHERE id = ? AND user_id = ?";
   db.query(sql, [text, comment_id, user_id], (err, result) => {
     if (err) {
-      console.error("Error updating profile:", err);
+      console.error("Error updating comment:", err);
       return res.status(500).json({ error: "Internal server error" });
     }
 
+    console.log("Comment updated successfully:", result);
     return res.status(200).json({
       message: "Comment updated successfully",
     });
@@ -346,25 +349,26 @@ app.put("/comment", (req, res) => {
 
 app.get("/comment/:post_id", (req, res) => {
   const sql = `SELECT 
-  c.id, 
-  c.text, 
-  commenter.full_name AS commenter_full_name, 
-  commenter.username AS commenter_username, 
-  COALESCE(commenter.image, 'default.png') AS commenter_image 
-FROM 
-  Comment AS c 
-INNER JOIN 
-  User AS commenter 
-ON 
-  commenter.id = c.user_id 
-WHERE 
-  c.post_id = ?`;
+    c.id, 
+    c.text, 
+    commenter.full_name AS commenter_full_name, 
+    commenter.username AS commenter_username, 
+    COALESCE(commenter.image, 'default.png') AS commenter_image 
+  FROM 
+    Comment AS c 
+  INNER JOIN 
+    User AS commenter 
+  ON 
+    commenter.id = c.user_id 
+  WHERE 
+    c.post_id = ?`;
 
-  db.query(sql, req.params.post_id, (err, result) => {
+  db.query(sql, [req.params.post_id], (err, result) => {
     if (err) {
       console.error("Error fetching comments:", err);
       return res.status(500).json({ error: "Error fetching comments" });
     }
+
     if (result.length > 0) {
       return res.json({
         status: "success",

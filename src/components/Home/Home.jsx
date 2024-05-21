@@ -313,8 +313,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }));
   };
 
-  const handleEditReply = () => {};
-
   // Function to submit a reply
   const handleReplySubmit = async (postId) => {
     try {
@@ -343,7 +341,47 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     }
   };
 
-  // Function to handle deleting a reply
+  const handleEditReplyClick = async (userId, commentId) => {
+    const newText = prompt("Enter the new text for your comment:");
+
+    if (!newText) {
+      alert("Comment text cannot be empty.");
+      return;
+    }
+
+    try {
+      console.log("Sending request to update comment:", {
+        user_id: userId,
+        comment_id: commentId,
+        text: newText,
+      });
+
+      const response = await axios.put("http://localhost:8081/comment", {
+        user_id: userId,
+        comment_id: commentId,
+        text: newText,
+      });
+
+      console.log("Received response:", response);
+
+      if (response.status === 200) {
+        console.log("Comment updated successfully:", response.data.message);
+        fetchPosts();
+      } else {
+        console.warn("Unexpected response status:", response.status);
+      }
+    } catch (error) {
+      console.error(
+        "Error updating comment:",
+        error.response ? error.response.data.error : error.message
+      );
+      alert(
+        "Error updating comment: " +
+          (error.response ? error.response.data.error : error.message)
+      );
+    }
+  };
+
   const handleDeleteReply = async (commentId) => {
     try {
       const user_id = getUserId();
@@ -424,6 +462,9 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
   const replyInputStyle = {
     marginBottom: "10px",
   };
+  const replyInputStyle2 = {
+    marginBottom: "10px",
+  };
 
   const replyPstyle2 = {
     marginLeft: "10px",
@@ -431,6 +472,8 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     paddingBottom: "10px",
     borderBottom: "1px solid #ccc",
   };
+
+  const ReplyEditStyle = {};
 
   return (
     <HomeParent>
@@ -481,11 +524,12 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                   <UserNiceNameContainer>{post.username}</UserNiceNameContainer>
                 </MeatBox>
                 <div style={{ position: "relative" }}>
-                  {storedUsername === post.username && ( // Check if the stored username matches the post's username
+                  {storedUsername === post.username && (
                     <HorizontalMeatballIcon
                       onClick={() => toggleDropdown(post.id)}
                     />
                   )}
+
                   {isDropdownOpen === post.id && (
                     <CrudBtn
                       id={`CrudElementBtn-${post.id}`}
@@ -545,7 +589,6 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                 />
               </IconContainer>
 
-              {/* Render replies */}
               <ReplyBox>
                 {replyingToPost === post.id && (
                   <div style={replyBox}>
@@ -565,21 +608,32 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                                 <UserNiceNameContainer>
                                   {reply.commenter_username}
                                 </UserNiceNameContainer>
-                                <div>
-                                  <>
-                                    <button onClick={() => handleEditReply()}>
-                                      Edit
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        handleDeleteReply(reply.id)
-                                      }
-                                    >
-                                      Delete
-                                    </button>
-                                  </>
-                                </div>
+                                {storedUsername ===
+                                  reply.commenter_username && (
+                                  <div style={ReplyEditStyle}>
+                                    <>
+                                      <button
+                                        onClick={() =>
+                                          handleEditReplyClick(
+                                            getUserId(),
+                                            reply.id
+                                          )
+                                        }
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleDeleteReply(reply.id)
+                                        }
+                                      >
+                                        Delete
+                                      </button>
+                                    </>
+                                  </div>
+                                )}
                               </MeatBox>
+
                               <p style={replyPstyle2}>{reply.text}</p>
                             </div>
                           </div>
