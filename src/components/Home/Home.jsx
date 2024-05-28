@@ -473,7 +473,13 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
     borderBottom: "1px solid #ccc",
   };
 
-  const ReplyEditStyle = {};
+  const ReplyEditStyle = {
+    marginLeft: "10px",
+  };
+
+  const editButton = {
+    marginRight: "5px",
+  };
 
   return (
     <HomeParent>
@@ -613,6 +619,7 @@ const Home = ({ bookmarkedPosts, setBookmarkedPosts }) => {
                                   <div style={ReplyEditStyle}>
                                     <>
                                       <button
+                                        style={editButton}
                                         onClick={() =>
                                           handleEditReplyClick(
                                             getUserId(),
